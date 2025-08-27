@@ -36,6 +36,23 @@
             overflow-y: auto;
             height: 80vh;
         }
+        #reset-view-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 1em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #reset-view-btn:hover {
+            background-color: #0056b3;
+        }
         #variant-list {
             list-style: none;
             padding: 0;
@@ -74,13 +91,12 @@
         <div id="viewport" class="viewer-container"></div>
         <div class="variant-container">
             <h2>Variants</h2>
+            <button id="reset-view-btn">Reset View</button>
             <p>Click a variant to highlight it on the structure.</p>
             <ul id="variant-list"></ul>
         </div>
     </div>
     
-    <!-- === CORRECTED SCRIPT TAG === -->
-    <!-- This is the known, working URL for the NGL library -->
     <script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
 
     <script>
@@ -102,37 +118,57 @@
             window.addEventListener("resize", () => stage.handleResize(), false);
 
             let proteinComponent = null;
+            
+            // === ROBUST STATE MANAGEMENT ===
+            // These variables will hold a direct reference to the active highlight.
+            let currentHighlight = null;
+            let currentLabel = null;
 
             function focusOnVariant(variant) {
                 if (!proteinComponent) return;
 
-                const oldHighlight = stage.getRepresentationsByName("highlight")[0];
-                const oldLabel = stage.getRepresentationsByName("highlight_label")[0];
-
-                if (oldHighlight) proteinComponent.removeRepresentation(oldHighlight);
-                if (oldLabel) proteinComponent.removeRepresentation(oldLabel);
+                // --- FIX APPLIED HERE ---
+                // If a highlight from a previous click exists, remove it directly.
+                if (currentHighlight) {
+                    proteinComponent.removeRepresentation(currentHighlight);
+                }
+                if (currentLabel) {
+                    proteinComponent.removeRepresentation(currentLabel);
+                }
 
                 const selectionString = `${variant.residue}:A`;
                 
-                proteinComponent.addRepresentation("licorice", {
-                    name: "highlight",
+                // Add new representations and store their references in our variables.
+                currentHighlight = proteinComponent.addRepresentation("licorice", {
                     sele: selectionString,
-                    color: "element",
-                    scale: 2.0,
-                    multipleBond: "symmetric"
+                    color: "element", scale: 2.0, multipleBond: "symmetric"
                 });
 
-                proteinComponent.addRepresentation("label", {
-                    name: "highlight_label",
+                currentLabel = proteinComponent.addRepresentation("label", {
                     sele: `${selectionString} and .CA`,
                     text: variant.name,
-                    color: "black",
+                    color: variant.color,
                     yOffset: 1.0,
                     fontFamily: "sans-serif",
                     fontWeight: "bold"
                 });
 
                 proteinComponent.autoView(selectionString, 1000);
+            }
+
+            function resetView() {
+                if (!proteinComponent) return;
+
+                // Use the same robust logic to clear the stored highlights.
+                if (currentHighlight) {
+                    proteinComponent.removeRepresentation(currentHighlight);
+                    currentHighlight = null;
+                }
+                if (currentLabel) {
+                    proteinComponent.removeRepresentation(currentLabel);
+                    currentLabel = null;
+                }
+                proteinComponent.autoView(1000);
             }
             
             function populateVariantList(existingResidues) {
@@ -186,6 +222,8 @@
                         focusOnVariant(variantData);
                     }
                 });
+                
+                document.getElementById('reset-view-btn').addEventListener('click', resetView);
                 
                 proteinComponent.autoView();
             }).catch(console.error);
