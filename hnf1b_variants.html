@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HNF1B Protein Structure with Missense Variants</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        #viewport {
+            width: 100%;
+            height: 600px;
+            position: relative;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>HNF1B Protein Structure (PDB: 2H8R) with Missense Variants</h1>
+    <p>This page displays the protein structure of HNF1B, highlighting specific missense variants of interest.</p>
+
+    <div id="viewport"></div>
+
+    <!-- Load the NGL library. Michelanglo and JQuery are no longer needed. -->
+    <script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
+
+    <!-- Our custom script. -->
+    <script>
+        // === FIX APPLIED HERE ===
+        // We replace the jQuery `$(document).ready()` with the modern, standard equivalent.
+        // This removes the need for the jQuery library entirely.
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ====================================================================
+            // === EDIT THIS LIST WITH YOUR CURATED MISSENSE VARIANT RESIDUES ===
+            // ====================================================================
+            const missenseVariantResidues = [25, 52, 89, 114, 150];
+            // ====================================================================
+
+            /**
+             * Custom "load function" to apply representations.
+             * @param {object} protein - The NGL component object for the structure.
+             */
+            function highlightVariants(protein) {
+                protein.addRepresentation('cartoon', {
+                    colorScheme: 'chainindex',
+                    aspectRatio: 6.0
+                });
+
+                const selectionString = missenseVariantResidues.join(', ') + ':A';
+
+                protein.addRepresentation('ball+stick', {
+                    sele: selectionString,
+                    color: 'red',
+                    aspectRatio: 1.5
+                });
+                
+                protein.addRepresentation("label", {
+                    sele: selectionString,
+                    color: "black",
+                    yOffset: 2.0,
+                    labelType: "res",
+                    fontFamily: "sans-serif",
+                    fontWeight: "bold"
+                });
+
+                protein.autoView();
+            }
+
+            // 1. Initialize the NGL Stage directly.
+            var stage = new NGL.Stage("viewport", { backgroundColor: "white" });
+
+            // 2. Load the file from the URL.
+            stage.loadFile("https://files.rcsb.org/download/2H8R.pdb", {
+                defaultRepresentation: false
+            }).then(function (proteinComponent) {
+                // 3. Once loaded, run our custom highlighting function.
+                highlightVariants(proteinComponent);
+            }).catch(function (error) {
+                console.error("NGL loading error:", error);
+                document.getElementById('viewport').innerText = "Error loading PDB file. Check console for details.";
+            });
+            
+            // Handle window resizing
+            window.addEventListener("resize", function () {
+                stage.handleResize();
+            }, false);
+
+        });
+    </script>
+
+</body>
+</html>
