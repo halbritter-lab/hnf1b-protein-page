@@ -3,92 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HNF1B Protein Structure with Missense Variants</title>
+    <title>Interactive HNF1B Variant Viewer</title>
     <style>
         body {
-            font-family: sans-serif;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 1em;
+            background-color: #f4f4f9;
         }
-        #viewport {
-            width: 100%;
-            height: 600px;
+        h1, p {
+            padding-left: 1em;
+        }
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+        }
+        .viewer-container {
+            flex: 3;
+            height: 80vh;
             position: relative;
             border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: white;
+        }
+        .variant-container {
+            flex: 2;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow-y: auto;
+            height: 80vh;
+        }
+        #variant-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #variant-list li {
+            padding: 12px 8px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s;
+        }
+        #variant-list li:not(.disabled):hover {
+            background-color: #eef2ff;
+        }
+        #variant-list li.disabled {
+            cursor: not-allowed;
+            color: #999;
+            background-color: #fafafa;
+        }
+        .color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
         }
     </style>
 </head>
 <body>
 
-    <h1>HNF1B Protein Structure (PDB: 2H8R) with Missense Variants</h1>
-    <p>This page displays the protein structure of HNF1B, highlighting specific missense variants of interest.</p>
+    <h1>HNF1B Interactive Variant Viewer (PDB: 2H8R)</h1>
 
-    <div id="viewport"></div>
-
-    <!-- Load the NGL library. Michelanglo and JQuery are no longer needed. -->
+    <div class="main-container">
+        <div id="viewport" class="viewer-container"></div>
+        <div class="variant-container">
+            <h2>Variants</h2>
+            <p>Click a variant to highlight it on the structure.</p>
+            <ul id="variant-list"></ul>
+        </div>
+    </div>
+    
+    <!-- === CORRECTED SCRIPT TAG === -->
+    <!-- This is the known, working URL for the NGL library -->
     <script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
 
-    <!-- Our custom script. -->
     <script>
-        // === FIX APPLIED HERE ===
-        // We replace the jQuery `$(document).ready()` with the modern, standard equivalent.
-        // This removes the need for the jQuery library entirely.
         document.addEventListener('DOMContentLoaded', function() {
 
-            // ====================================================================
-            // === EDIT THIS LIST WITH YOUR CURATED MISSENSE VARIANT RESIDUES ===
-            // ====================================================================
-            const missenseVariantResidues = [25, 52, 89, 114, 150];
-            // ====================================================================
+            const variants = [
+                { name: 'p.Glu78Ter', residue: 78, type: 'Pathogenic', color: 'red' },
+                { name: 'p.Arg165His', residue: 165, type: 'Pathogenic', color: 'red' },
+                { name: 'p.Gln136Glu', residue: 136, type: 'Likely Pathogenic', color: 'orange' },
+                { name: 'p.Lys164Gln', residue: 164, type: 'Likely Pathogenic', color: 'orange' },
+                { name: 'p.Asn228Lys', residue: 228, type: 'Likely Benign', color: '#f5d547' },
+                { name: 'p.Ser36Phe', residue: 36, type: 'Likely Benign', color: '#f5d547' },
+                { name: 'p.Val173Ile', residue: 173, type: 'Uncertain Significance', color: 'grey' },
+                { name: 'p.Pro256Ser', residue: 256, type: 'Uncertain Significance', color: 'grey' }
+            ];
 
-            /**
-             * Custom "load function" to apply representations.
-             * @param {object} protein - The NGL component object for the structure.
-             */
-            function highlightVariants(protein) {
-                protein.addRepresentation('cartoon', {
-                    colorScheme: 'chainindex',
-                    aspectRatio: 6.0
-                });
+            var stage = new NGL.Stage("viewport");
+            stage.setParameters({ backgroundColor: "white" });
+            window.addEventListener("resize", () => stage.handleResize(), false);
 
-                const selectionString = missenseVariantResidues.join(', ') + ':A';
+            let proteinComponent = null;
 
-                protein.addRepresentation('ball+stick', {
-                    sele: selectionString,
-                    color: 'red',
-                    aspectRatio: 1.5
-                });
+            function focusOnVariant(variant) {
+                if (!proteinComponent) return;
+
+                const oldHighlight = stage.getRepresentationsByName("highlight")[0];
+                const oldLabel = stage.getRepresentationsByName("highlight_label")[0];
+
+                if (oldHighlight) proteinComponent.removeRepresentation(oldHighlight);
+                if (oldLabel) proteinComponent.removeRepresentation(oldLabel);
+
+                const selectionString = `${variant.residue}:A`;
                 
-                protein.addRepresentation("label", {
+                proteinComponent.addRepresentation("licorice", {
+                    name: "highlight",
                     sele: selectionString,
+                    color: "element",
+                    scale: 2.0,
+                    multipleBond: "symmetric"
+                });
+
+                proteinComponent.addRepresentation("label", {
+                    name: "highlight_label",
+                    sele: `${selectionString} and .CA`,
+                    text: variant.name,
                     color: "black",
-                    yOffset: 2.0,
-                    labelType: "res",
+                    yOffset: 1.0,
                     fontFamily: "sans-serif",
                     fontWeight: "bold"
                 });
 
-                protein.autoView();
+                proteinComponent.autoView(selectionString, 1000);
+            }
+            
+            function populateVariantList(existingResidues) {
+                const listElement = document.getElementById('variant-list');
+                listElement.innerHTML = ''; 
+
+                const rank = { 'Pathogenic': 1, 'Likely Pathogenic': 2, 'Likely Benign': 3, 'Uncertain Significance': 4 };
+                variants.sort((a, b) => rank[a.type] - rank[b.type]);
+
+                variants.forEach(variant => {
+                    const item = document.createElement('li');
+                    item.dataset.variant = JSON.stringify(variant);
+                    
+                    const residueExists = existingResidues.has(variant.residue);
+
+                    if (!residueExists) {
+                        item.classList.add('disabled');
+                        item.title = `Residue ${variant.residue} is not resolved in the PDB structure and cannot be shown.`;
+                    }
+
+                    item.innerHTML = `
+                        <div class="color-dot" style="background-color: ${residueExists ? variant.color : '#ccc'};"></div>
+                        <div>
+                            <strong>${variant.name}</strong><br>
+                            <small>Significance: ${variant.type}</small>
+                        </div>
+                    `;
+                    listElement.appendChild(item);
+                });
             }
 
-            // 1. Initialize the NGL Stage directly.
-            var stage = new NGL.Stage("viewport", { backgroundColor: "white" });
-
-            // 2. Load the file from the URL.
             stage.loadFile("https://files.rcsb.org/download/2H8R.pdb", {
                 defaultRepresentation: false
-            }).then(function (proteinComponent) {
-                // 3. Once loaded, run our custom highlighting function.
-                highlightVariants(proteinComponent);
-            }).catch(function (error) {
-                console.error("NGL loading error:", error);
-                document.getElementById('viewport').innerText = "Error loading PDB file. Check console for details.";
-            });
-            
-            // Handle window resizing
-            window.addEventListener("resize", function () {
-                stage.handleResize();
-            }, false);
+            }).then(function (component) {
+                proteinComponent = component;
+                proteinComponent.addRepresentation("cartoon", { colorScheme: 'sstruc' });
+                
+                const existingResidues = new Set();
+                component.structure.eachResidue(function(residueProxy) {
+                    if (residueProxy.chainname === 'A') {
+                        existingResidues.add(residueProxy.resno);
+                    }
+                });
 
+                populateVariantList(existingResidues);
+
+                document.getElementById('variant-list').addEventListener('click', function(event) {
+                    const clickedItem = event.target.closest('li');
+                    if (clickedItem && !clickedItem.classList.contains('disabled')) {
+                        const variantData = JSON.parse(clickedItem.dataset.variant);
+                        focusOnVariant(variantData);
+                    }
+                });
+                
+                proteinComponent.autoView();
+            }).catch(console.error);
         });
     </script>
 
