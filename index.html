@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive HNF1B Variant Viewer</title>
+    
+    <!-- External CSS files -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/viewer.css">
+    <link rel="stylesheet" href="css/variants.css">
+</head>
+<body>
+
+    <h1>HNF1B Interactive Variant Viewer (PDB: 2H8R)</h1>
+
+    <div class="main-container">
+        <div id="viewport" class="viewer-container"></div>
+        <div class="variant-container">
+            <h2>Variants</h2>
+            <button id="reset-view-btn">Reset View</button>
+            <p>Click a variant to highlight it on the structure.</p>
+            <ul id="variant-list"></ul>
+        </div>
+    </div>
+    
+    <!-- External JavaScript libraries and modules -->
+    <script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
+    <script type="module" src="js/main.js"></script>
+
+</body>
+</html>

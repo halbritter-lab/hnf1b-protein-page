@@ -1,0 +1,9 @@
+/* 3D viewer container styles */
+.viewer-container {
+    flex: 3;
+    height: 80vh;
+    position: relative;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: white;
+}

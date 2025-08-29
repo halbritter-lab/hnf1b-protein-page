@@ -1,0 +1,62 @@
+/* Variant list and UI styles */
+.variant-container {
+    flex: 2;
+    padding: 15px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow-y: auto;
+    height: 80vh;
+}
+
+#reset-view-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    font-size: 1em;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#reset-view-btn:hover {
+    background-color: #0056b3;
+}
+
+#variant-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#variant-list li {
+    padding: 12px 8px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.2s;
+}
+
+#variant-list li:not(.disabled):hover {
+    background-color: #eef2ff;
+}
+
+#variant-list li.disabled {
+    cursor: not-allowed;
+    color: #999;
+    background-color: #fafafa;
+}
+
+.color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
