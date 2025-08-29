@@ -25,19 +25,19 @@ This is a modular bioinformatics visualization tool that displays genetic varian
 ```
 
 **Core Components**:
-- **ProteinViewer**: ES6 class managing NGL.js Stage, protein loading, highlighting, and state
-- **VariantManager**: ES6 class handling variant list UI, sorting, and event management
-- **Data Layer**: Variant objects exported from `variants.js` module
-- **3D Visualization**: NGL.js-powered protein viewer that loads PDB structures from RCSB servers
-- **Interactive UI**: Two-column layout with 3D viewer (left) and clickable variant list (right)
+- **ProteinViewer**: ES6 class managing NGL.js Stage, protein loading, highlighting, and state management. Handles PDB loading from RCSB servers, residue existence checking, and 3D representation control.
+- **VariantManager**: ES6 class handling variant list UI, sorting by pathogenicity, and DOM event management. Manages variant-to-viewer communication and dynamic list population.
+- **Data Layer**: Variant objects exported from `variants.js` module with standardized schema (name, residue, type, color)
+- **Application Coordinator**: `main.js` orchestrates initialization sequence: viewer setup → protein loading → residue validation → UI population → event binding
 
 **Key Technical Patterns**:
-- ES6 modules with import/export syntax
-- Class-based architecture for encapsulation
-- Uses NGL.js `Stage` and `Component` objects for 3D rendering
-- Implements residue existence checking to handle incomplete PDB structures (2H8R only contains residues 170-280)
-- Dynamic DOM manipulation for variant list generation with automatic sorting by pathogenicity
-- Event-driven interaction model with click handlers for variant selection and view reset
+- ES6 modules with import/export syntax for clean dependency management
+- Class-based architecture with clear separation of concerns
+- Uses NGL.js `Stage` and `Component` objects for 3D rendering with stateful highlight management
+- Implements residue existence checking to handle incomplete PDB structures (2H8R fragment contains residues 170-280)
+- Dynamic DOM manipulation with automatic pathogenicity-based sorting
+- Event-driven interaction model with delegation for scalable variant list handling
+- Async/await pattern for protein loading with proper error handling
 
 ## Development Commands
 
@@ -45,7 +45,7 @@ This is a modular bioinformatics visualization tool that displays genetic varian
 ```bash
 # Serve the HTML file locally for testing
 python3 -m http.server 8000
-# Then navigate to http://localhost:8000/hnf1b_variants.html
+# Then navigate to http://localhost:8000/index.html
 ```
 
 **No Build Process**: This is a static HTML file with no compilation or build steps required.
