@@ -1,9 +1,9 @@
 // Application initialization and coordination
 import { variants } from './variants.js';
-import { ProteinViewer } from './ProteinViewer.js';
-import { VariantManager } from './VariantManager.js';
-import { DistanceCalculator } from './DistanceCalculator.js';
-import { RepresentationManager } from './RepresentationManager.js';
+import { ProteinViewer } from './protein-viewer.js';
+import { VariantManager } from './variant-manager.js';
+import { DistanceCalculator } from './distance-calculator.js';
+import { RepresentationManager } from './representation-manager.js';
 
 document.addEventListener('DOMContentLoaded', async function() {
     try {

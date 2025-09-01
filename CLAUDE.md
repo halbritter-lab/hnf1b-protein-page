@@ -16,17 +16,24 @@ This is a modular bioinformatics visualization tool that displays genetic varian
 ├── css/
 │   ├── main.css           # Global styles and layout
 │   ├── viewer.css         # 3D viewer container styles
-│   └── variants.css       # Variant list and UI styles
+│   ├── variants.css       # Variant list and UI styles
+│   ├── distances.css      # Distance visualization styles
+│   └── representations.css # Protein representation styles
 └── js/
-    ├── variants.js        # Variant data configuration
-    ├── ProteinViewer.js   # NGL viewer management class
-    ├── VariantManager.js  # Variant UI logic class
+    ├── variants.js         # Variant data configuration
+    ├── protein-viewer.js   # NGL viewer management class
+    ├── variant-manager.js  # Variant UI logic class
+    ├── distance-calculator.js # Distance calculation logic
+    ├── representation-manager.js # Representation control
+    ├── ngl-config.js      # NGL.js configuration
     └── main.js            # Application initialization
 ```
 
 **Core Components**:
-- **ProteinViewer**: ES6 class managing NGL.js Stage, protein loading, highlighting, and state management. Handles PDB loading from RCSB servers, residue existence checking, and 3D representation control.
-- **VariantManager**: ES6 class handling variant list UI, sorting by pathogenicity, and DOM event management. Manages variant-to-viewer communication and dynamic list population.
+- **protein-viewer.js**: ES6 class managing NGL.js Stage, protein loading, highlighting, and state management. Handles PDB loading from RCSB servers, residue existence checking, and 3D representation control.
+- **variant-manager.js**: ES6 class handling variant list UI, sorting by pathogenicity, and DOM event management. Manages variant-to-viewer communication and dynamic list population.
+- **distance-calculator.js**: Calculates distances between protein residues and DNA helix.
+- **representation-manager.js**: Manages different protein display representations.
 - **Data Layer**: Variant objects exported from `variants.js` module with standardized schema (name, residue, type, color)
 - **Application Coordinator**: `main.js` orchestrates initialization sequence: viewer setup → protein loading → residue validation → UI population → event binding
 
@@ -65,6 +72,13 @@ export const variants = [
 - 'Likely Pathogenic' (orange) 
 - 'Likely Benign' (#f5d547)
 - 'Uncertain Significance' (grey)
+
+## Naming Conventions
+
+**File Naming**: All files use kebab-case (lowercase with hyphens) for consistency:
+- JavaScript files: `protein-viewer.js`, `variant-manager.js`
+- CSS files: `main.css`, `viewer.css`, `variants.css`
+- HTML files: `index.html`
 
 ## Technical Considerations
 
