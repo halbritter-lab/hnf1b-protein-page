@@ -1,0 +1,149 @@
+/* Distance visualization and control styles */
+
+/* Distance control panel */
+.distance-controls {
+    margin: 15px 0;
+    padding: 15px;
+    border-top: 2px solid #e0e0e0;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.distance-controls h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 1.1em;
+}
+
+/* Control buttons and selects */
+.control-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.control-group button {
+    padding: 8px 15px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.control-group button:hover {
+    background-color: #1976D2;
+}
+
+.control-group select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+}
+
+/* Sort mode selector */
+#sort-mode {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* Distance filter */
+#distance-filter {
+    flex: 1;
+    min-width: 150px;
+}
+
+/* Distance information in variant list */
+.variant-info {
+    flex: 1;
+}
+
+.distance-info {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+/* Distance category colors */
+.distance-close {
+    color: #d32f2f;  /* Red for close contact (<5Å) */
+}
+
+.distance-medium {
+    color: #ff9800;  /* Orange for medium distance (5-10Å) */
+}
+
+.distance-far {
+    color: #4caf50;  /* Green for far distance (>10Å) */
+}
+
+/* Distance labels in variant list */
+#variant-list li {
+    position: relative;
+    padding-right: 10px;
+}
+
+#variant-list li .distance-badge {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: bold;
+    background-color: #f0f0f0;
+}
+
+#variant-list li .distance-badge.close {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+#variant-list li .distance-badge.medium {
+    background-color: #fff3e0;
+    color: #ff9800;
+}
+
+#variant-list li .distance-badge.far {
+    background-color: #e8f5e9;
+    color: #4caf50;
+}
+
+/* Toggle DNA button special state */
+#toggle-dna-btn {
+    background-color: #673AB7;
+}
+
+#toggle-dna-btn:hover {
+    background-color: #5E35B1;
+}
+
+/* Show all distances button */
+#show-distances-btn {
+    background-color: #FF5722;
+}
+
+#show-distances-btn:hover {
+    background-color: #E64A19;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .control-group {
+        flex-direction: column;
+    }
+    
+    .control-group button,
+    .control-group select {
+        width: 100%;
+    }
+}

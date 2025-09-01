@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/viewer.css">
     <link rel="stylesheet" href="css/variants.css">
+    <link rel="stylesheet" href="css/distances.css">
 </head>
 <body>
 
@@ -20,6 +21,29 @@
             <h2>Variants</h2>
             <button id="reset-view-btn">Reset View</button>
             <p>Click a variant to highlight it on the structure.</p>
+            
+            <!-- DNA Distance Controls -->
+            <div class="distance-controls">
+                <h3>DNA Interaction Analysis</h3>
+                
+                <!-- Sort mode selector -->
+                <select id="sort-mode">
+                    <option value="pathogenicity">Sort by Pathogenicity</option>
+                    <option value="distance">Sort by Distance to DNA</option>
+                </select>
+                
+                <div class="control-group">
+                    <button id="toggle-dna-btn">Show DNA</button>
+                    <button id="show-distances-btn">Show All Distances</button>
+                    <select id="distance-filter">
+                        <option value="all">All Variants</option>
+                        <option value="close">< 5Å (Direct Contact)</option>
+                        <option value="medium">5-10Å (Indirect)</option>
+                        <option value="far">> 10Å (Distant)</option>
+                    </select>
+                </div>
+            </div>
+            
             <ul id="variant-list"></ul>
         </div>
     </div>
