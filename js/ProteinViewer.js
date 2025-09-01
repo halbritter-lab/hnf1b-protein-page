@@ -14,6 +14,12 @@ export class ProteinViewer {
         this.distanceRepresentations = [];
         this.showingDNA = false;
         this.showingAllDistances = false;
+        
+        // Representation management
+        this.currentProteinRepresentation = null;
+        this.currentRepresentationType = 'cartoon';
+        this.sidechainRepresentation = null;
+        this.representationManager = null;
     }
     
     async loadProtein(pdbId = "2H8R") {
@@ -23,7 +29,11 @@ export class ProteinViewer {
                 { defaultRepresentation: false }
             );
             
-            this.proteinComponent.addRepresentation("cartoon", { colorScheme: 'sstruc' });
+            // Store the initial representation
+            this.currentProteinRepresentation = this.proteinComponent.addRepresentation("cartoon", { 
+                colorScheme: 'sstruc',
+                sele: 'protein'
+            });
             this.proteinComponent.autoView();
             
             return this.proteinComponent;
@@ -31,6 +41,11 @@ export class ProteinViewer {
             console.error('Failed to load protein:', error);
             throw error;
         }
+    }
+    
+    // Set the representation manager
+    setRepresentationManager(manager) {
+        this.representationManager = manager;
     }
     
     getExistingResidues() {
@@ -208,5 +223,68 @@ export class ProteinViewer {
         if (distance < 5) return "#d32f2f";   // Red for close
         if (distance < 10) return "#ff9800";  // Orange for medium
         return "#4caf50";                      // Green for far
+    }
+    
+    // Change protein representation
+    changeRepresentation(type, options = {}) {
+        if (!this.proteinComponent || !this.representationManager) return;
+        
+        // Remove current protein representation
+        if (this.currentProteinRepresentation) {
+            this.proteinComponent.removeRepresentation(this.currentProteinRepresentation);
+            this.currentProteinRepresentation = null;
+        }
+        
+        // Get configuration from RepresentationManager
+        const config = this.representationManager.getRepresentationConfig(type, options);
+        
+        // Add new representation
+        this.currentProteinRepresentation = this.proteinComponent.addRepresentation(type, config);
+        this.currentRepresentationType = type;
+        
+        // Update representation manager's current state
+        this.representationManager.updateSettings({ representation: type });
+        
+        return this.currentProteinRepresentation;
+    }
+    
+    // Update color scheme for current representation
+    updateColorScheme(colorScheme) {
+        if (!this.proteinComponent || !this.representationManager) return;
+        
+        this.representationManager.updateSettings({ colorScheme: colorScheme });
+        
+        // Recreate representation with new color scheme
+        this.changeRepresentation(this.currentRepresentationType);
+    }
+    
+    // Update opacity for current representation
+    updateOpacity(opacity) {
+        if (!this.proteinComponent || !this.currentProteinRepresentation) return;
+        
+        const opacityValue = opacity / 100; // Convert from percentage
+        this.representationManager.updateSettings({ opacity: opacityValue });
+        
+        // Only certain representations support opacity
+        if (this.representationManager.supportsOpacity(this.currentRepresentationType)) {
+            this.changeRepresentation(this.currentRepresentationType);
+        }
+    }
+    
+    // Toggle sidechain display
+    toggleSidechains(show) {
+        if (!this.proteinComponent || !this.representationManager) return;
+        
+        if (show && this.representationManager.supportsSidechains(this.currentRepresentationType)) {
+            // Add sidechain representation
+            const sidechainConfig = this.representationManager.getSidechainConfig();
+            this.sidechainRepresentation = this.proteinComponent.addRepresentation('licorice', sidechainConfig);
+        } else if (this.sidechainRepresentation) {
+            // Remove sidechain representation
+            this.proteinComponent.removeRepresentation(this.sidechainRepresentation);
+            this.sidechainRepresentation = null;
+        }
+        
+        this.representationManager.updateSettings({ showSidechains: show });
     }
 }

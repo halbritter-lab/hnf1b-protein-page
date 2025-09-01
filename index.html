@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="css/viewer.css">
     <link rel="stylesheet" href="css/variants.css">
     <link rel="stylesheet" href="css/distances.css">
+    <link rel="stylesheet" href="css/representations.css">
 </head>
 <body>
 
@@ -22,6 +23,58 @@
             <button id="reset-view-btn">Reset View</button>
             <p>Click a variant to highlight it on the structure.</p>
             
+            <!-- Protein Representation Controls -->
+            <div class="representation-controls">
+                <h3>Display Style</h3>
+                
+                <!-- Main representation selector -->
+                <select id="representation-select">
+                    <option value="cartoon" selected>Cartoon (Secondary Structure)</option>
+                    <option value="surface">Surface</option>
+                    <option value="ball+stick">Ball & Stick</option>
+                    <option value="licorice">Sticks</option>
+                    <option value="ribbon">Ribbon</option>
+                    <option value="backbone">Backbone</option>
+                </select>
+                
+                <!-- Advanced options -->
+                <div class="representation-options">
+                    <!-- Color scheme selector -->
+                    <div class="option-group">
+                        <label for="color-scheme">Color Scheme:</label>
+                        <select id="color-scheme">
+                            <option value="sstruc" selected>Secondary Structure</option>
+                            <option value="element">Element</option>
+                            <option value="residueindex">Rainbow by Position</option>
+                            <option value="hydrophobicity">Hydrophobicity</option>
+                            <option value="bfactor">B-factor</option>
+                            <option value="chainindex">Chain</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Opacity control -->
+                    <div class="option-group opacity-control">
+                        <label for="opacity-slider">Opacity:</label>
+                        <input type="range" id="opacity-slider" min="10" max="100" value="100">
+                        <span id="opacity-value">100%</span>
+                    </div>
+                    
+                    <!-- Sidechain toggle -->
+                    <div class="option-group" id="sidechain-group">
+                        <label>
+                            <input type="checkbox" id="show-sidechains">
+                            Show Sidechains
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Loading indicator -->
+                <div class="representation-loading">Loading representation</div>
+                
+                <!-- Info text -->
+                <div class="representation-info" id="representation-info" style="display: none;"></div>
+            </div>
+            
             <!-- DNA Distance Controls -->
             <div class="distance-controls">
                 <h3>DNA Interaction Analysis</h3>
@@ -33,7 +86,7 @@
                 </select>
                 
                 <div class="control-group">
-                    <button id="toggle-dna-btn">Show DNA</button>
+                    <button id="toggle-dna-btn">Hide DNA</button>
                     <button id="show-distances-btn">Show All Distances</button>
                     <select id="distance-filter">
                         <option value="all">All Variants</option>

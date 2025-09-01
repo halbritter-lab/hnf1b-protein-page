@@ -151,6 +151,107 @@ export class VariantManager {
                 this.filterVariantsByDistance(event.target.value);
             });
         }
+        
+        // Representation controls handlers
+        this.initializeRepresentationHandlers();
+    }
+    
+    initializeRepresentationHandlers() {
+        // Representation selector handler
+        const repSelect = document.getElementById('representation-select');
+        if (repSelect) {
+            repSelect.addEventListener('change', (event) => {
+                const loadingIndicator = document.querySelector('.representation-loading');
+                const infoDiv = document.getElementById('representation-info');
+                const opacitySlider = document.getElementById('opacity-slider');
+                const opacityValue = document.getElementById('opacity-value');
+                
+                // Show loading indicator
+                if (loadingIndicator) {
+                    loadingIndicator.classList.add('active');
+                }
+                
+                // Auto-adjust opacity for surface representation
+                if (event.target.value === 'surface' && opacitySlider && opacitySlider.value > 70) {
+                    // Set surface to 70% opacity by default for better visibility
+                    opacitySlider.value = 70;
+                    if (opacityValue) {
+                        opacityValue.textContent = '70%';
+                    }
+                    this.proteinViewer.updateOpacity(70);
+                }
+                
+                // Change representation
+                this.proteinViewer.changeRepresentation(event.target.value);
+                
+                // Update info text
+                if (infoDiv && this.proteinViewer.representationManager) {
+                    const repInfo = this.proteinViewer.representationManager.representations[event.target.value];
+                    if (repInfo) {
+                        infoDiv.textContent = repInfo.description;
+                        infoDiv.style.display = 'block';
+                    }
+                }
+                
+                // Update sidechain checkbox state
+                this.updateSidechainState(event.target.value);
+                
+                // Hide loading indicator after a short delay
+                setTimeout(() => {
+                    if (loadingIndicator) {
+                        loadingIndicator.classList.remove('active');
+                    }
+                }, 500);
+            });
+        }
+        
+        // Color scheme selector handler
+        const colorSchemeSelect = document.getElementById('color-scheme');
+        if (colorSchemeSelect) {
+            colorSchemeSelect.addEventListener('change', (event) => {
+                this.proteinViewer.updateColorScheme(event.target.value);
+            });
+        }
+        
+        // Opacity slider handler
+        const opacitySlider = document.getElementById('opacity-slider');
+        const opacityValue = document.getElementById('opacity-value');
+        if (opacitySlider) {
+            opacitySlider.addEventListener('input', (event) => {
+                const value = event.target.value;
+                if (opacityValue) {
+                    opacityValue.textContent = `${value}%`;
+                }
+                this.proteinViewer.updateOpacity(value);
+            });
+        }
+        
+        // Sidechain checkbox handler
+        const sidechainCheckbox = document.getElementById('show-sidechains');
+        if (sidechainCheckbox) {
+            sidechainCheckbox.addEventListener('change', (event) => {
+                this.proteinViewer.toggleSidechains(event.target.checked);
+            });
+        }
+    }
+    
+    updateSidechainState(representationType) {
+        const sidechainGroup = document.getElementById('sidechain-group');
+        const sidechainCheckbox = document.getElementById('show-sidechains');
+        
+        if (sidechainGroup && this.proteinViewer.representationManager) {
+            const supportsSidechains = this.proteinViewer.representationManager.supportsSidechains(representationType);
+            
+            if (supportsSidechains) {
+                sidechainGroup.classList.remove('disabled');
+            } else {
+                sidechainGroup.classList.add('disabled');
+                if (sidechainCheckbox) {
+                    sidechainCheckbox.checked = false;
+                    this.proteinViewer.toggleSidechains(false);
+                }
+            }
+        }
     }
     
     filterVariantsByDistance(filterValue) {

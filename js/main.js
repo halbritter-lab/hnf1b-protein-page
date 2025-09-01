@@ -3,17 +3,25 @@ import { variants } from './variants.js';
 import { ProteinViewer } from './ProteinViewer.js';
 import { VariantManager } from './VariantManager.js';
 import { DistanceCalculator } from './DistanceCalculator.js';
+import { RepresentationManager } from './RepresentationManager.js';
 
 document.addEventListener('DOMContentLoaded', async function() {
     try {
         // Initialize protein viewer
         const proteinViewer = new ProteinViewer("viewport");
         
+        // Initialize representation manager and attach to viewer
+        const representationManager = new RepresentationManager();
+        proteinViewer.setRepresentationManager(representationManager);
+        
         // Initialize variant manager
         const variantManager = new VariantManager(variants, proteinViewer);
         
         // Load protein structure
         await proteinViewer.loadProtein("2H8R");
+        
+        // Show DNA by default
+        proteinViewer.toggleDNADisplay(true);
         
         // Initialize distance calculator
         const distanceCalculator = new DistanceCalculator(proteinViewer.proteinComponent);
