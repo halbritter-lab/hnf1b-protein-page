@@ -107,8 +107,8 @@ def extract_snv_variants(csv_file):
     
     return variants
 
-def generate_js_file(variants):
-    """Generate the JavaScript file content"""
+def generate_js_file(variants, unparsed_variants=None):
+    """Generate the JavaScript file content with optional unparsed variants as comments"""
     js_content = """// Variant data configuration
 // Note: distanceToDNA and closestDNAAtom will be populated dynamically by DistanceCalculator
 export const variants = [
@@ -122,6 +122,38 @@ export const variants = [
             js_content += "\n"
     
     js_content += "];\n"
+    
+    # Add unparsed variants as a commented section if provided
+    if unparsed_variants:
+        js_content += "\n// UNPARSED VARIANTS FROM CSV\n"
+        js_content += "// These variants could not be automatically converted to protein notation (p. format)\n"
+        js_content += "// They are preserved here for reference and potential manual conversion\n"
+        js_content += "// Total unparsed: " + str(len(unparsed_variants)) + "\n"
+        js_content += "/*\n"
+        js_content += "const unparsedVariants = [\n"
+        
+        # Group variants by type for better organization
+        cdna_variants = [v for v in unparsed_variants if v.startswith('c.')]
+        ivs_variants = [v for v in unparsed_variants if 'IVS' in v.upper()]
+        other_variants = [v for v in unparsed_variants if not v.startswith('c.') and 'IVS' not in v.upper()]
+        
+        if cdna_variants:
+            js_content += "  // cDNA notation variants (c.)\n"
+            for variant in sorted(cdna_variants):
+                js_content += f"  '{variant}',\n"
+        
+        if ivs_variants:
+            js_content += "  // Intronic variants (IVS)\n"
+            for variant in sorted(ivs_variants):
+                js_content += f"  '{variant}',\n"
+        
+        if other_variants:
+            js_content += "  // Other variants\n"
+            for variant in sorted(other_variants):
+                js_content += f"  '{variant}',\n"
+        
+        js_content += "];\n"
+        js_content += "*/\n"
     
     return js_content
 
@@ -260,8 +292,8 @@ def main():
         if len(unparsed) > 10:
             print(f"  ... and {len(unparsed) - 10} more")
     
-    # Generate JavaScript file content
-    js_content = generate_js_file(variants)
+    # Generate JavaScript file content with unparsed variants included as comments
+    js_content = generate_js_file(variants, unparsed)
     
     # Write to file
     with open(output_file, 'w') as f:
