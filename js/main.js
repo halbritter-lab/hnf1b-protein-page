@@ -26,14 +26,33 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Initialize distance calculator
         const distanceCalculator = new DistanceCalculator(proteinViewer.proteinComponent);
         if (distanceCalculator.initialize()) {
-            // Calculate distances for all variants
-            const distanceMap = distanceCalculator.calculateAllDistances(variants);
+            // Calculate distances for all variants (default to using closest atom)
+            const useClosestAtom = document.getElementById('use-sidechain-distance').checked;
+            const distanceMap = distanceCalculator.calculateAllDistances(variants, useClosestAtom);
             
             // Update variant manager with distance information
             variantManager.setDistanceCalculator(distanceCalculator);
             variantManager.setDistanceMap(distanceMap);
             
             console.log('Distance calculations completed:', distanceMap.size, 'variants analyzed');
+            
+            // Expose distance calculator for debugging
+            window.distanceCalculator = distanceCalculator;
+            console.log('Distance calculator available for testing. Try: distanceCalculator.testDistanceCalculation(295)');
+            
+            // Add event listener for distance mode toggle
+            document.getElementById('use-sidechain-distance').addEventListener('change', (event) => {
+                const useClosest = event.target.checked;
+                console.log(`Recalculating distances using ${useClosest ? 'closest atom' : 'CA only'} method...`);
+                
+                // Recalculate all distances with new method
+                const newDistanceMap = distanceCalculator.calculateAllDistances(variants, useClosest);
+                variantManager.setDistanceMap(newDistanceMap);
+                
+                // Refresh the variant list to show updated distances
+                const existingResidues = proteinViewer.getExistingResidues();
+                variantManager.populateVariantList(existingResidues);
+            });
         } else {
             console.warn('Distance calculator initialization failed - DNA distance features disabled');
         }

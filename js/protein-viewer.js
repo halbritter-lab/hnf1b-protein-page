@@ -147,11 +147,16 @@ export class ProteinViewer {
         // Clear existing distance representations
         this.clearDistanceRepresentations();
         
+        // Use the actual closest residue atom from distanceInfo, not hardcoded CA
+        const residueAtomName = distanceInfo.residueAtom ? distanceInfo.residueAtom.atomname : 'CA';
+        
         // Create atom pair for distance representation
         const atomPair = [
-            `${variant.residue}:A.CA`,
+            `${variant.residue}:A.${residueAtomName}`,
             `${distanceInfo.dnaAtom.resno}:${distanceInfo.dnaAtom.chainname}.${distanceInfo.dnaAtom.atomname}`
         ];
+        
+        console.log(`Showing distance: Residue ${variant.residue} ${residueAtomName} to DNA ${distanceInfo.dnaAtom.atomname} = ${distanceInfo.distance.toFixed(1)}Å`);
         
         // Add distance representation
         const distanceRep = this.proteinComponent.addRepresentation("distance", {
@@ -193,8 +198,11 @@ export class ProteinViewer {
             variants.forEach(variant => {
                 const distanceInfo = distanceMap.get(variant.residue);
                 if (distanceInfo) {
+                    // Use the actual closest residue atom from distanceInfo
+                    const residueAtomName = distanceInfo.residueAtom ? distanceInfo.residueAtom.atomname : 'CA';
+                    
                     const atomPair = [
-                        `${variant.residue}:A.CA`,
+                        `${variant.residue}:A.${residueAtomName}`,
                         `${distanceInfo.dnaAtom.resno}:${distanceInfo.dnaAtom.chainname}.${distanceInfo.dnaAtom.atomname}`
                     ];
                     

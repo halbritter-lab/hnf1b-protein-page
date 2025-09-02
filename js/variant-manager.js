@@ -57,14 +57,17 @@ export class VariantManager {
                 item.title = `Residue ${variant.residue} is not resolved in the PDB structure and cannot be shown.`;
             }
             
-            // Format distance display
+            // Format distance display with atom details
             let distanceDisplay = '';
             if (this.distanceMap && residueExists) {
                 const distanceInfo = this.distanceMap.get(variant.residue);
                 if (distanceInfo) {
                     const distance = distanceInfo.distance;
                     const category = this.getDistanceCategory(distance);
-                    distanceDisplay = `<small class="distance-info distance-${category}">Distance to DNA: ${distance.toFixed(1)}Å</small>`;
+                    const atomName = distanceInfo.residueAtom ? distanceInfo.residueAtom.atomname : 'CA';
+                    const measurementNote = distanceInfo.measurementType === 'closest-atom' ? 
+                        ` (${atomName} atom)` : ' (CA atom)';
+                    distanceDisplay = `<small class="distance-info distance-${category}">Distance to DNA: ${distance.toFixed(1)}Å${measurementNote}</small>`;
                 }
             }
 

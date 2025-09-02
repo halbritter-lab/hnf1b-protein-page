@@ -85,6 +85,17 @@
                     <option value="distance">Sort by Distance to DNA</option>
                 </select>
                 
+                <!-- Distance measurement mode -->
+                <div class="option-group">
+                    <label>
+                        <input type="checkbox" id="use-sidechain-distance" checked>
+                        Use closest sidechain atom
+                    </label>
+                    <small style="display: block; margin-left: 20px; color: #666;">
+                        (unchecked uses CA backbone only)
+                    </small>
+                </div>
+                
                 <div class="control-group">
                     <button id="toggle-dna-btn">Hide DNA</button>
                     <button id="show-distances-btn">Show All Distances</button>
