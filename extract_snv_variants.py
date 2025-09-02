@@ -1,0 +1,287 @@
+import csv
+import re
+import json
+
+def extract_snv_variants(csv_file):
+    """Extract SNV variants from CSV file and format them for variants.js"""
+    variants = []
+    seen_variants = set()  # Track unique variants to avoid duplicates
+    
+    # Amino acid conversion dictionaries
+    single_to_three = {
+        'A': 'Ala', 'C': 'Cys', 'D': 'Asp', 'E': 'Glu', 'F': 'Phe',
+        'G': 'Gly', 'H': 'His', 'I': 'Ile', 'K': 'Lys', 'L': 'Leu',
+        'M': 'Met', 'N': 'Asn', 'P': 'Pro', 'Q': 'Gln', 'R': 'Arg',
+        'S': 'Ser', 'T': 'Thr', 'V': 'Val', 'W': 'Trp', 'Y': 'Tyr',
+        '*': 'Ter', 'X': 'Ter'  # Stop codons
+    }
+    
+    with open(csv_file, 'r', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        
+        for row in reader:
+            # Only process SNV variant types
+            if row['VariantType'] != 'SNV':
+                continue
+                
+            variant_reported = row.get('VariantReported', '')
+            if not variant_reported:
+                continue
+            
+            # Try three-letter code pattern first (p.Xxx###Xxx)
+            protein_pattern_three = r'p\.([A-Z][a-z]{2})(\d+)([A-Z][a-z]{2}|Ter|\*)'
+            match = re.search(protein_pattern_three, variant_reported)
+            
+            if match:
+                # Extract components from three-letter format
+                ref_aa = match.group(1)
+                position = int(match.group(2))
+                alt_aa = match.group(3)
+            else:
+                # Try single-letter code pattern (p.X###X)
+                protein_pattern_single = r'p\.([A-Z])(\d+)([A-Z\*])'
+                match = re.search(protein_pattern_single, variant_reported)
+                
+                if match:
+                    # Convert single-letter to three-letter format
+                    ref_aa_single = match.group(1)
+                    position = int(match.group(2))
+                    alt_aa_single = match.group(3)
+                    
+                    ref_aa = single_to_three.get(ref_aa_single, ref_aa_single)
+                    alt_aa = single_to_three.get(alt_aa_single, alt_aa_single)
+                else:
+                    # Also check for variants like "p.78X" or "p.78*" (stop codons)
+                    stop_pattern = r'p\.(\d+)([X\*])'
+                    match = re.search(stop_pattern, variant_reported)
+                    if match:
+                        position = int(match.group(1))
+                        # For stop codons without reference amino acid, skip
+                        # as we need the reference amino acid for proper naming
+                        continue
+                    else:
+                        continue
+            
+            # Format variant name in three-letter code
+            variant_name = f'p.{ref_aa}{position}{alt_aa}'
+            
+            # Skip if we've already seen this variant
+            if variant_name in seen_variants:
+                continue
+            seen_variants.add(variant_name)
+            
+            # Determine pathogenicity classification and color
+            classification = row.get('verdict_classification', 'Uncertain Significance')
+            
+            # Map classification to color
+            if classification == 'Pathogenic':
+                color = 'red'
+                type_label = 'Pathogenic'
+            elif classification == 'Likely Pathogenic':
+                color = 'orange'
+                type_label = 'Likely Pathogenic'
+            elif classification == 'Benign':
+                color = 'green'
+                type_label = 'Benign'
+            elif classification == 'Likely Benign':
+                color = '#f5d547'
+                type_label = 'Likely Benign'
+            else:  # Uncertain Significance or unknown
+                color = 'grey'
+                type_label = 'Uncertain Significance'
+            
+            # Create variant object
+            variant = {
+                'name': variant_name,
+                'residue': position,
+                'type': type_label,
+                'color': color,
+                'distanceToDNA': None,
+                'closestDNAAtom': None
+            }
+            
+            variants.append(variant)
+    
+    # Sort variants by residue position
+    variants.sort(key=lambda x: x['residue'])
+    
+    return variants
+
+def generate_js_file(variants):
+    """Generate the JavaScript file content"""
+    js_content = """// Variant data configuration
+// Note: distanceToDNA and closestDNAAtom will be populated dynamically by DistanceCalculator
+export const variants = [
+"""
+    
+    for i, variant in enumerate(variants):
+        js_content += f"    {{ name: '{variant['name']}', residue: {variant['residue']}, type: '{variant['type']}', color: '{variant['color']}', distanceToDNA: null, closestDNAAtom: null }}"
+        if i < len(variants) - 1:
+            js_content += ",\n"
+        else:
+            js_content += "\n"
+    
+    js_content += "];\n"
+    
+    return js_content
+
+def extract_snv_variants_with_logging(csv_file):
+    """Extract SNV variants and log any that couldn't be parsed"""
+    variants = []
+    seen_variants = set()
+    unparsed_variants = []
+    
+    # Amino acid conversion dictionaries
+    single_to_three = {
+        'A': 'Ala', 'C': 'Cys', 'D': 'Asp', 'E': 'Glu', 'F': 'Phe',
+        'G': 'Gly', 'H': 'His', 'I': 'Ile', 'K': 'Lys', 'L': 'Leu',
+        'M': 'Met', 'N': 'Asn', 'P': 'Pro', 'Q': 'Gln', 'R': 'Arg',
+        'S': 'Ser', 'T': 'Thr', 'V': 'Val', 'W': 'Trp', 'Y': 'Tyr',
+        '*': 'Ter', 'X': 'Ter'
+    }
+    
+    with open(csv_file, 'r', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        
+        for row in reader:
+            if row['VariantType'] != 'SNV':
+                continue
+                
+            variant_reported = row.get('VariantReported', '')
+            if not variant_reported:
+                continue
+            
+            parsed = False
+            ref_aa = None
+            position = None
+            alt_aa = None
+            
+            # Try three-letter code pattern first (p.Xxx###Xxx)
+            protein_pattern_three = r'p\.([A-Z][a-z]{2})(\d+)([A-Z][a-z]{2}|Ter|\*|X)'
+            match = re.search(protein_pattern_three, variant_reported)
+            
+            if match:
+                ref_aa = match.group(1)
+                position = int(match.group(2))
+                alt_aa = match.group(3)
+                if alt_aa == 'X':
+                    alt_aa = 'Ter'
+                parsed = True
+            
+            if not parsed:
+                # Try single-letter code pattern with p. prefix (p.X###X)
+                protein_pattern_single = r'p\.([A-Z])(\d+)([A-Z\*X])'
+                match = re.search(protein_pattern_single, variant_reported)
+                
+                if match:
+                    ref_aa_single = match.group(1)
+                    position = int(match.group(2))
+                    alt_aa_single = match.group(3)
+                    
+                    ref_aa = single_to_three.get(ref_aa_single, ref_aa_single)
+                    alt_aa = single_to_three.get(alt_aa_single, alt_aa_single)
+                    parsed = True
+            
+            if not parsed:
+                # Try single-letter code pattern without p. prefix (X###X)
+                protein_pattern_simple = r'([A-Z])(\d+)([A-Z\*X])'
+                # Make sure it's not part of a longer string (avoid matching things like c.232G>T)
+                if not re.match(r'c\.', variant_reported):
+                    match = re.search(protein_pattern_simple, variant_reported)
+                    
+                    if match:
+                        ref_aa_single = match.group(1)
+                        position = int(match.group(2))
+                        alt_aa_single = match.group(3)
+                        
+                        # Skip if it looks like a nucleotide change (common nucleotides)
+                        if ref_aa_single not in ['A', 'T', 'G', 'C'] or alt_aa_single not in ['A', 'T', 'G', 'C']:
+                            ref_aa = single_to_three.get(ref_aa_single, ref_aa_single)
+                            alt_aa = single_to_three.get(alt_aa_single, alt_aa_single)
+                            parsed = True
+            
+            if not parsed:
+                unparsed_variants.append(variant_reported)
+                continue
+            
+            variant_name = f'p.{ref_aa}{position}{alt_aa}'
+            
+            if variant_name in seen_variants:
+                continue
+            seen_variants.add(variant_name)
+            
+            classification = row.get('verdict_classification', 'Uncertain Significance')
+            
+            if classification == 'Pathogenic':
+                color = 'red'
+                type_label = 'Pathogenic'
+            elif classification == 'Likely Pathogenic':
+                color = 'orange'
+                type_label = 'Likely Pathogenic'
+            elif classification == 'Benign':
+                color = 'green'
+                type_label = 'Benign'
+            elif classification == 'Likely Benign':
+                color = '#f5d547'
+                type_label = 'Likely Benign'
+            else:
+                color = 'grey'
+                type_label = 'Uncertain Significance'
+            
+            variant = {
+                'name': variant_name,
+                'residue': position,
+                'type': type_label,
+                'color': color,
+                'distanceToDNA': None,
+                'closestDNAAtom': None
+            }
+            
+            variants.append(variant)
+    
+    variants.sort(key=lambda x: x['residue'])
+    
+    return variants, unparsed_variants
+
+def main():
+    csv_file = '/mnt/c/development/hnf1b-protein-page/data/HNF1B_DataCuration - Individuals.csv'
+    output_file = '/mnt/c/development/hnf1b-protein-page/js/variants.js'
+    
+    # Extract SNV variants with logging
+    print("Extracting SNV variants from CSV...")
+    variants, unparsed = extract_snv_variants_with_logging(csv_file)
+    
+    print(f"Found {len(variants)} unique SNV variants")
+    
+    if unparsed:
+        print(f"\n⚠ Found {len(unparsed)} SNV variants that couldn't be parsed:")
+        for var in unparsed[:10]:  # Show first 10
+            print(f"  - {var}")
+        if len(unparsed) > 10:
+            print(f"  ... and {len(unparsed) - 10} more")
+    
+    # Generate JavaScript file content
+    js_content = generate_js_file(variants)
+    
+    # Write to file
+    with open(output_file, 'w') as f:
+        f.write(js_content)
+    
+    print(f"\nSuccessfully wrote {len(variants)} variants to {output_file}")
+    
+    # Print summary statistics
+    pathogenic_count = sum(1 for v in variants if v['type'] == 'Pathogenic')
+    likely_pathogenic_count = sum(1 for v in variants if v['type'] == 'Likely Pathogenic')
+    benign_count = sum(1 for v in variants if v['type'] == 'Benign')
+    likely_benign_count = sum(1 for v in variants if v['type'] == 'Likely Benign')
+    uncertain_count = sum(1 for v in variants if v['type'] == 'Uncertain Significance')
+    
+    print("\nVariant classification summary:")
+    print(f"  Pathogenic: {pathogenic_count}")
+    print(f"  Likely Pathogenic: {likely_pathogenic_count}")
+    print(f"  Benign: {benign_count}")
+    print(f"  Likely Benign: {likely_benign_count}")
+    print(f"  Uncertain Significance: {uncertain_count}")
+
+if __name__ == "__main__":
+    main()
