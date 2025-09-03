@@ -13,20 +13,31 @@ This is a modular bioinformatics visualization tool that displays genetic varian
 **File Structure**:
 ```
 ├── index.html              # Main HTML entry point
-├── css/
+├── CLAUDE.md              # Project documentation for Claude
+├── README.md              # Project README
+├── css/                   # Stylesheets
 │   ├── main.css           # Global styles and layout
 │   ├── viewer.css         # 3D viewer container styles
 │   ├── variants.css       # Variant list and UI styles
 │   ├── distances.css      # Distance visualization styles
 │   └── representations.css # Protein representation styles
-└── js/
-    ├── variants.js         # Variant data configuration
-    ├── protein-viewer.js   # NGL viewer management class
-    ├── variant-manager.js  # Variant UI logic class
-    ├── distance-calculator.js # Distance calculation logic
-    ├── representation-manager.js # Representation control
-    ├── ngl-config.js      # NGL.js configuration
-    └── main.js            # Application initialization
+├── js/                    # JavaScript modules
+│   ├── variants.js         # Variant data configuration
+│   ├── protein-viewer.js   # NGL viewer management class
+│   ├── variant-manager.js  # Variant UI logic class
+│   ├── distance-calculator.js # Distance calculation logic
+│   ├── representation-manager.js # Representation control
+│   ├── ngl-config.js      # NGL.js configuration
+│   └── main.js            # Application initialization
+├── scripts/               # Python analysis scripts
+│   ├── extract-snv-variants.py    # Extract variants from CSV
+│   └── analyze-variant-distances.py # Statistical analysis
+├── data/                  # Input data files
+│   ├── HNF1B_DataCuration - Individuals.csv
+│   └── variant-distances.json
+└── output/                # Generated analysis outputs
+    ├── variant-distance-analysis.png
+    └── variant-distance-processed.csv
 ```
 
 **Core Components**:
@@ -56,6 +67,17 @@ python3 -m http.server 8000
 ```
 
 **No Build Process**: This is a static HTML file with no compilation or build steps required.
+
+**Python Scripts**:
+```bash
+# Extract variants from CSV and update js/variants.js
+cd scripts
+python extract-snv-variants.py
+
+# Run statistical analysis on variant distances
+python analyze-variant-distances.py
+# Outputs: ../output/variant-distance-analysis.png and variant-distance-processed.csv
+```
 
 ## Data Management
 
