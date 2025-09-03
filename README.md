@@ -1,36 +1,102 @@
-# hnf1b-protein-page
+# HNF1B Protein Variant Viewer
 
-# Interactive HNF1B Variant Viewer
+An interactive web-based visualization tool for exploring clinically relevant genetic variants on the 3D structure of HNF1B protein.
 
-This project is a self-contained HTML webpage for visualizing clinically relevant genetic variants on a 3D structure of the HNF1B protein. It allows users to see the location of specific variants, color-coded by their pathogenic significance, on an experimental structure from the Protein Data Bank (PDB).
+🔗 **Live Demo:** [https://halbritter-lab.github.io/hnf1b-protein-page/](https://halbritter-lab.github.io/hnf1b-protein-page/)
 
-## Project Development Journey
+## Overview
 
-This tool was developed through an iterative process of brainstorming, implementation, and debugging.
+This application provides an interactive 3D visualization of the HNF1B protein structure (PDB ID: 2H8R) with mapped genetic variants. Variants are color-coded by their clinical significance, allowing researchers and clinicians to explore the spatial distribution of pathogenic mutations.
 
-### 1. Initial Goal & Technology Choice
-The initial goal was to create a simple web page to display missense variants on the HNF1B protein structure (PDB ID: 2H8R). The JavaScript library `Michelanglo.js`, a user-friendly wrapper for the powerful `NGL.js` viewer, was chosen as the starting point.
+## Features
 
-### 2. Early Challenges & Technical Pivot
-Initial attempts using the Michelanglo library ran into several issues:
-- **Network Errors:** The default method for fetching protein structures failed due to DNS resolution issues.
-- **Library-Specific Bugs:** The Michelanglo wrapper produced cryptic errors when trying to load the structure from a direct URL.
-- **Dependency Conflicts:** Attempts to bypass the wrapper led to conflicts with its jQuery dependency.
+- **Interactive 3D Visualization:** Rotate, zoom, and explore the protein structure using NGL.js
+- **Variant Mapping:** Clinically relevant missense variants mapped onto the 3D structure
+- **Pathogenicity Color-Coding:** Visual classification of variants by clinical significance
+- **Distance Analysis:** Calculate distances between variants and DNA helix
+- **Multiple Representations:** View protein in cartoon, surface, or ball-and-stick representations
+- **Responsive Interface:** Two-column layout with 3D viewer and interactive variant list
 
-These challenges led to a crucial decision: to abandon the Michelanglo wrapper and use the core **NGL.js library** directly. This provided more control, stability, and removed unnecessary dependencies.
+## Technical Stack
 
-### 3. Building an Interactive Tool
-With a stable viewer in place, the project evolved from a static visualization into an interactive tool:
-- **Two-Column Layout:** The interface was redesigned to have the 3D viewer on the left and a clickable list of variants on the right.
-- **Data-Driven Approach:** A JavaScript array of variant "objects" was created to act as a central, easily updatable database for the application.
-- **Dynamic List Generation:** The clickable list is now generated automatically from this data array.
-- **Interactivity:** Clicking a variant in the list now highlights it on the protein structure and zooms the camera to focus on it.
+- **Frontend:** Vanilla JavaScript (ES6 modules), HTML5, CSS3
+- **3D Visualization:** NGL.js v2.0.0-dev.34
+- **Data Analysis:** Python scripts for variant extraction and statistical analysis
+- **Deployment:** GitHub Pages (static site hosting)
 
-### 4. Key Scientific and Technical Refinements
-The final stage of development focused on scientific accuracy and user experience:
-- **Handling Incomplete Structures:** A major realization was that the PDB file (`2H8R`) is only a fragment of the full protein (residues 170-280). The script was upgraded to programmatically check which variants exist within the loaded model. Variants that are out of range or in missing/unresolved loops (like p.Asn228Lys) are now automatically disabled in the list, with an informative tooltip.
-- **Improved Visualization:** The default highlight was replaced with a more chemically informative "licorice" representation. Crucially, the label was changed to show the full variant name (e.g., "p.Val173Ile") and was color-coded according to its pathogenic significance.
-- **Robust State Management:** A persistent bug where old highlights would remain on the screen was fixed by implementing a stateful system. The script now keeps a direct reference to the currently active highlight, ensuring it can be reliably removed before a new one is shown.
-- **User-Friendly Features:** A "Reset View" button was added to clear all highlights and return to the default view of the entire protein. The variant list is also automatically sorted by pathogenic significance.
+## Installation
 
-This iterative process of identifying problems and implementing robust solutions resulted in a scientifically accurate, user-friendly, and powerful bioinformatics visualization tool.
+### Local Development
+
+1. Clone the repository:
+```bash
+git clone https://github.com/halbritter-lab/hnf1b-protein-page.git
+cd hnf1b-protein-page
+```
+
+2. Serve locally:
+```bash
+python3 -m http.server 8000
+```
+
+3. Open in browser:
+```
+http://localhost:8000
+```
+
+## Usage
+
+### Adding New Variants
+
+Edit the `js/variants.js` file:
+```javascript
+export const variants = [
+    { name: 'p.Val173Ile', residue: 173, type: 'Pathogenic', color: 'red' },
+    // Add new variants here
+];
+```
+
+### Running Analysis Scripts
+
+Extract variants from CSV data:
+```bash
+cd scripts
+python extract-snv-variants.py
+```
+
+Analyze variant-DNA distances:
+```bash
+python analyze-variant-distances.py
+```
+
+## Data Sources
+
+- **Protein Structure:** PDB ID 2H8R (HNF1B fragment, residues 170-280)
+- **Variant Data:** Curated clinical genetics database
+- **Clinical Significance:** ClinVar classifications
+
+## Browser Requirements
+
+- Modern browser with WebGL support
+- ES6 module support
+- JavaScript enabled
+
+## Contributing
+
+Contributions are welcome! Please submit issues and pull requests via GitHub.
+
+## License
+
+This project is licensed under the MIT License - see LICENSE file for details.
+
+## Citation
+
+If you use this tool in your research, please cite:
+```
+HNF1B Protein Variant Viewer
+https://github.com/halbritter-lab/hnf1b-protein-page
+```
+
+## Contact
+
+For questions or support, please open an issue on GitHub.
