@@ -1,0 +1,728 @@
+[
+  {
+    "name": "p.Met1Ile",
+    "residue": 1,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 13.58872997884379,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Leu12Phe",
+    "residue": 12,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ser36Phe",
+    "residue": 36,
+    "pathogenicity": "Likely Benign",
+    "color": "#f5d547",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Val61Gly",
+    "residue": 61,
+    "pathogenicity": "Likely Benign",
+    "color": "#f5d547",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Gly68Arg",
+    "residue": 68,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Gly76Cys",
+    "residue": 76,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Glu78Asp",
+    "residue": 78,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Asp82Asn",
+    "residue": 82,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Leu92Phe",
+    "residue": 92,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 29.357986392007327,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Glu105Lys",
+    "residue": 105,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 22.940368485671573,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Val110Gly",
+    "residue": 110,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 15.426486402776616,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg112Pro",
+    "residue": 112,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 17.10901640886549,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ile125Thr",
+    "residue": 125,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 11.085189787804866,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Lys126Arg",
+    "residue": 126,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 5.5533967242969124,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.His132Pro",
+    "residue": 132,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 10.325484229442026,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.His132Arg",
+    "residue": 132,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 10.325484229442026,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Asn133Ser",
+    "residue": 133,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 7.117992048598018,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Gln136Glu",
+    "residue": 136,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 2.795103767879377,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Glu138Lys",
+    "residue": 138,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 5.372925342759043,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Leu145Gln",
+    "residue": 145,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 4.927344689382833,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Gln147Glu",
+    "residue": 147,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 2.745166689199519,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ser148Leu",
+    "residue": 148,
+    "pathogenicity": "Pathogenic",
+    "color": "red",
+    "distance_to_dna": 2.829019482408019,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ser148Trp",
+    "residue": 148,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 2.829019482408019,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ser151Pro",
+    "residue": 151,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 2.8415835821213764,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ser151Cys",
+    "residue": 151,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 2.8415835821213764,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Gln152Arg",
+    "residue": 152,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 3.8682974479343244,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.His153Asn",
+    "residue": 153,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 7.520014868580603,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Asn155Asp",
+    "residue": 155,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 3.3411031994473666,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Lys156Glu",
+    "residue": 156,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 2.525286483527119,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Thr158Asn",
+    "residue": 158,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 4.335683046491029,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Pro159Leu",
+    "residue": 159,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 3.086095196299604,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Met160Val",
+    "residue": 160,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 3.82786031236586,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Lys164Gln",
+    "residue": 164,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 3.118989107560276,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg165His",
+    "residue": 165,
+    "pathogenicity": "Pathogenic",
+    "color": "red",
+    "distance_to_dna": 6.8541942999290235,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg165Pro",
+    "residue": 165,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 6.8541942999290235,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg165Cys",
+    "residue": 165,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 6.8541942999290235,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg165Gly",
+    "residue": 165,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 6.8541942999290235,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ala167Thr",
+    "residue": 167,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 10.099678110117212,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Leu168Pro",
+    "residue": 168,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 10.352066493047856,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Tyr169His",
+    "residue": 169,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 11.054936811017265,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Thr170Pro",
+    "residue": 170,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 14.091786202357955,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Trp171Cys",
+    "residue": 171,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 10.574528737512548,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Val173Ile",
+    "residue": 173,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 17.508366556887218,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Val173Leu",
+    "residue": 173,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 17.508366556887218,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg177Gln",
+    "residue": 177,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 19.77426070866243,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg181Gln",
+    "residue": 181,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 21.351092433978735,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ser197Arg",
+    "residue": 197,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Asn228Lys",
+    "residue": 228,
+    "pathogenicity": "Likely Benign",
+    "color": "#f5d547",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg232Cys",
+    "residue": 232,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 4.080146268119192,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg233His",
+    "residue": 233,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 5.264838354288771,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg235Gln",
+    "residue": 235,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 3.3381311489970327,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg235Trp",
+    "residue": 235,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 3.3381311489970327,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Trp238Leu",
+    "residue": 238,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 3.0732237171503782,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Gly239Arg",
+    "residue": 239,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 5.652265526882828,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Gly239Glu",
+    "residue": 239,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 5.652265526882828,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ala241Thr",
+    "residue": 241,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 10.385131961082951,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Asp251Asn",
+    "residue": 251,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 12.802685841195144,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Gln253Pro",
+    "residue": 253,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 8.621258877634505,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Pro256Ser",
+    "residue": 256,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 4.66948538801138,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Glu260Asp",
+    "residue": 260,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 8.518658091748557,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg261Gly",
+    "residue": 261,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 2.9357410319098394,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Leu264Ser",
+    "residue": 264,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 13.171721803378274,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Cys273Tyr",
+    "residue": 273,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 15.460132949466766,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Cys273Ser",
+    "residue": 273,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 15.460132949466766,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg276Gly",
+    "residue": 276,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 11.327040362436815,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg276Gln",
+    "residue": 276,
+    "pathogenicity": "Pathogenic",
+    "color": "red",
+    "distance_to_dna": 11.327040362436815,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Gly285Asp",
+    "residue": 285,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 15.238793363271698,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Leu286Arg",
+    "residue": 286,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 11.959007092655494,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Asn289His",
+    "residue": 289,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 7.559129558519352,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg295Cys",
+    "residue": 295,
+    "pathogenicity": "Pathogenic",
+    "color": "red",
+    "distance_to_dna": 2.7458555201552914,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg295His",
+    "residue": 295,
+    "pathogenicity": "Pathogenic",
+    "color": "red",
+    "distance_to_dna": 2.7458555201552914,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg295Pro",
+    "residue": 295,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 2.7458555201552914,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Trp299Gly",
+    "residue": 299,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 4.994094782682365,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Asn302Lys",
+    "residue": 302,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": 3.3172539693437324,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg303His",
+    "residue": 303,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": 4.99189789655789,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ala314Thr",
+    "residue": 314,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.His336Asp",
+    "residue": 336,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.His336Arg",
+    "residue": 336,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ser342Pro",
+    "residue": 342,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Pro343Leu",
+    "residue": 343,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ser367Gly",
+    "residue": 367,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Gly370Ser",
+    "residue": 370,
+    "pathogenicity": "Likely Benign",
+    "color": "#f5d547",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Asn418Thr",
+    "residue": 418,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ser465Arg",
+    "residue": 465,
+    "pathogenicity": "Likely Pathogenic",
+    "color": "orange",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Gly492Ser",
+    "residue": 492,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Arg527Gln",
+    "residue": 527,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Met532Val",
+    "residue": 532,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  },
+  {
+    "name": "p.Ser547Phe",
+    "residue": 547,
+    "pathogenicity": "Uncertain Significance",
+    "color": "grey",
+    "distance_to_dna": null,
+    "closest_dna_atom": null,
+    "method": "closest_atom"
+  }
+]
