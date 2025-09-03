@@ -1,0 +1,67 @@
+name,residue,pathogenicity,color,distance_to_dna,method,closest_dna_atom,three_group,two_group,pathogenicity_score
+p.Met1Ile,1,Likely Pathogenic,orange,13.58872997884379,closest_atom,,P/LP,P/LP,4
+p.Leu92Phe,92,Uncertain Significance,grey,29.357986392007327,closest_atom,,VUS,VUS,3
+p.Glu105Lys,105,Uncertain Significance,grey,22.940368485671573,closest_atom,,VUS,VUS,3
+p.Val110Gly,110,Likely Pathogenic,orange,15.426486402776616,closest_atom,,P/LP,P/LP,4
+p.Arg112Pro,112,Uncertain Significance,grey,17.10901640886549,closest_atom,,VUS,VUS,3
+p.Ile125Thr,125,Likely Pathogenic,orange,11.085189787804866,closest_atom,,P/LP,P/LP,4
+p.Lys126Arg,126,Uncertain Significance,grey,5.5533967242969124,closest_atom,,VUS,VUS,3
+p.His132Pro,132,Uncertain Significance,grey,10.325484229442026,closest_atom,,VUS,VUS,3
+p.His132Arg,132,Uncertain Significance,grey,10.325484229442026,closest_atom,,VUS,VUS,3
+p.Asn133Ser,133,Uncertain Significance,grey,7.117992048598018,closest_atom,,VUS,VUS,3
+p.Gln136Glu,136,Likely Pathogenic,orange,2.795103767879377,closest_atom,,P/LP,P/LP,4
+p.Glu138Lys,138,Likely Pathogenic,orange,5.372925342759043,closest_atom,,P/LP,P/LP,4
+p.Leu145Gln,145,Uncertain Significance,grey,4.927344689382833,closest_atom,,VUS,VUS,3
+p.Gln147Glu,147,Uncertain Significance,grey,2.745166689199519,closest_atom,,VUS,VUS,3
+p.Ser148Leu,148,Pathogenic,red,2.829019482408019,closest_atom,,P/LP,P/LP,5
+p.Ser148Trp,148,Likely Pathogenic,orange,2.829019482408019,closest_atom,,P/LP,P/LP,4
+p.Ser151Pro,151,Likely Pathogenic,orange,2.8415835821213764,closest_atom,,P/LP,P/LP,4
+p.Ser151Cys,151,Likely Pathogenic,orange,2.8415835821213764,closest_atom,,P/LP,P/LP,4
+p.Gln152Arg,152,Uncertain Significance,grey,3.8682974479343244,closest_atom,,VUS,VUS,3
+p.His153Asn,153,Uncertain Significance,grey,7.520014868580603,closest_atom,,VUS,VUS,3
+p.Asn155Asp,155,Uncertain Significance,grey,3.3411031994473666,closest_atom,,VUS,VUS,3
+p.Lys156Glu,156,Likely Pathogenic,orange,2.525286483527119,closest_atom,,P/LP,P/LP,4
+p.Thr158Asn,158,Likely Pathogenic,orange,4.335683046491029,closest_atom,,P/LP,P/LP,4
+p.Pro159Leu,159,Likely Pathogenic,orange,3.086095196299604,closest_atom,,P/LP,P/LP,4
+p.Met160Val,160,Likely Pathogenic,orange,3.82786031236586,closest_atom,,P/LP,P/LP,4
+p.Lys164Gln,164,Likely Pathogenic,orange,3.118989107560276,closest_atom,,P/LP,P/LP,4
+p.Arg165His,165,Pathogenic,red,6.8541942999290235,closest_atom,,P/LP,P/LP,5
+p.Arg165Pro,165,Likely Pathogenic,orange,6.8541942999290235,closest_atom,,P/LP,P/LP,4
+p.Arg165Cys,165,Likely Pathogenic,orange,6.8541942999290235,closest_atom,,P/LP,P/LP,4
+p.Arg165Gly,165,Likely Pathogenic,orange,6.8541942999290235,closest_atom,,P/LP,P/LP,4
+p.Ala167Thr,167,Uncertain Significance,grey,10.099678110117212,closest_atom,,VUS,VUS,3
+p.Leu168Pro,168,Uncertain Significance,grey,10.352066493047856,closest_atom,,VUS,VUS,3
+p.Tyr169His,169,Likely Pathogenic,orange,11.054936811017265,closest_atom,,P/LP,P/LP,4
+p.Thr170Pro,170,Likely Pathogenic,orange,14.091786202357955,closest_atom,,P/LP,P/LP,4
+p.Trp171Cys,171,Uncertain Significance,grey,10.574528737512548,closest_atom,,VUS,VUS,3
+p.Val173Ile,173,Uncertain Significance,grey,17.508366556887218,closest_atom,,VUS,VUS,3
+p.Val173Leu,173,Uncertain Significance,grey,17.508366556887218,closest_atom,,VUS,VUS,3
+p.Arg177Gln,177,Uncertain Significance,grey,19.77426070866243,closest_atom,,VUS,VUS,3
+p.Arg181Gln,181,Uncertain Significance,grey,21.351092433978735,closest_atom,,VUS,VUS,3
+p.Arg232Cys,232,Uncertain Significance,grey,4.080146268119192,closest_atom,,VUS,VUS,3
+p.Arg233His,233,Uncertain Significance,grey,5.264838354288771,closest_atom,,VUS,VUS,3
+p.Arg235Gln,235,Likely Pathogenic,orange,3.3381311489970327,closest_atom,,P/LP,P/LP,4
+p.Arg235Trp,235,Likely Pathogenic,orange,3.3381311489970327,closest_atom,,P/LP,P/LP,4
+p.Trp238Leu,238,Uncertain Significance,grey,3.0732237171503782,closest_atom,,VUS,VUS,3
+p.Gly239Arg,239,Likely Pathogenic,orange,5.652265526882828,closest_atom,,P/LP,P/LP,4
+p.Gly239Glu,239,Likely Pathogenic,orange,5.652265526882828,closest_atom,,P/LP,P/LP,4
+p.Ala241Thr,241,Uncertain Significance,grey,10.385131961082951,closest_atom,,VUS,VUS,3
+p.Asp251Asn,251,Uncertain Significance,grey,12.802685841195144,closest_atom,,VUS,VUS,3
+p.Gln253Pro,253,Uncertain Significance,grey,8.621258877634505,closest_atom,,VUS,VUS,3
+p.Pro256Ser,256,Uncertain Significance,grey,4.66948538801138,closest_atom,,VUS,VUS,3
+p.Glu260Asp,260,Likely Pathogenic,orange,8.518658091748557,closest_atom,,P/LP,P/LP,4
+p.Arg261Gly,261,Uncertain Significance,grey,2.9357410319098394,closest_atom,,VUS,VUS,3
+p.Leu264Ser,264,Uncertain Significance,grey,13.171721803378274,closest_atom,,VUS,VUS,3
+p.Cys273Tyr,273,Uncertain Significance,grey,15.460132949466766,closest_atom,,VUS,VUS,3
+p.Cys273Ser,273,Uncertain Significance,grey,15.460132949466766,closest_atom,,VUS,VUS,3
+p.Arg276Gly,276,Likely Pathogenic,orange,11.327040362436815,closest_atom,,P/LP,P/LP,4
+p.Arg276Gln,276,Pathogenic,red,11.327040362436815,closest_atom,,P/LP,P/LP,5
+p.Gly285Asp,285,Likely Pathogenic,orange,15.238793363271698,closest_atom,,P/LP,P/LP,4
+p.Leu286Arg,286,Uncertain Significance,grey,11.959007092655494,closest_atom,,VUS,VUS,3
+p.Asn289His,289,Likely Pathogenic,orange,7.559129558519352,closest_atom,,P/LP,P/LP,4
+p.Arg295Cys,295,Pathogenic,red,2.7458555201552914,closest_atom,,P/LP,P/LP,5
+p.Arg295His,295,Pathogenic,red,2.7458555201552914,closest_atom,,P/LP,P/LP,5
+p.Arg295Pro,295,Likely Pathogenic,orange,2.7458555201552914,closest_atom,,P/LP,P/LP,4
+p.Trp299Gly,299,Uncertain Significance,grey,4.994094782682365,closest_atom,,VUS,VUS,3
+p.Asn302Lys,302,Uncertain Significance,grey,3.3172539693437324,closest_atom,,VUS,VUS,3
+p.Arg303His,303,Likely Pathogenic,orange,4.99189789655789,closest_atom,,P/LP,P/LP,4
