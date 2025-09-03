@@ -9,6 +9,13 @@ def extract_snv_variants(csv_file):
     variants = []
     seen_variants = set()  # Track unique variants to avoid duplicates
 
+    # Valid three-letter amino acid codes for validation
+    valid_three_letter = {
+        'Ala', 'Cys', 'Asp', 'Glu', 'Phe', 'Gly', 'His', 'Ile',
+        'Lys', 'Leu', 'Met', 'Asn', 'Pro', 'Gln', 'Arg', 'Ser',
+        'Thr', 'Val', 'Trp', 'Tyr', 'Ter'
+    }
+
     # Amino acid conversion dictionaries
     single_to_three = {
         'A': 'Ala', 'C': 'Cys', 'D': 'Asp', 'E': 'Glu', 'F': 'Phe',
@@ -26,44 +33,86 @@ def extract_snv_variants(csv_file):
             if row['VariantType'] != 'SNV':
                 continue
 
-            variant_reported = row.get('VariantReported', '')
-            if not variant_reported:
-                continue
+            # Use Varisome column for protein variant extraction
+            varisome_data = row.get('Varsome', '')
+            if not varisome_data:
+                # Fallback to VariantReported if Varisome is empty
+                varisome_data = row.get('VariantReported', '')
+                if not varisome_data:
+                    continue
 
-            # Try three-letter code pattern first (p.Xxx###Xxx)
-            protein_pattern_three = (
-                r'p\.([A-Z][a-z]{2})(\d+)([A-Z][a-z]{2}|Ter|\*)'
-            )
-            match = re.search(protein_pattern_three, variant_reported)
+            # Extract protein variant from Varisome format:
+            # HNF1B(NM_000458.4):c.###X>X (p.XxxYyyZzz)
+            # Pattern to extract protein variant from parentheses
+            protein_in_parens = r'\(p\.([^)]+)\)'
+            match = re.search(protein_in_parens, varisome_data)
 
             if match:
-                # Extract components from three-letter format
-                ref_aa = match.group(1)
-                position = int(match.group(2))
-                alt_aa = match.group(3)
-            else:
-                # Try single-letter code pattern (p.X###X)
-                protein_pattern_single = r'p\.([A-Z])(\d+)([A-Z\*])'
-                match = re.search(protein_pattern_single, variant_reported)
+                protein_variant = 'p.' + match.group(1)
+                # Parse the extracted protein variant
+                # Try three-letter code pattern (p.Xxx###Xxx)
+                protein_pattern_three = (
+                    r'p\.([A-Z][a-z]{2})(\d+)([A-Z][a-z]{2}|Ter|\*)'
+                )
+                match = re.search(protein_pattern_three, protein_variant)
 
                 if match:
-                    # Convert single-letter to three-letter format
-                    ref_aa_single = match.group(1)
+                    ref_aa = match.group(1)
                     position = int(match.group(2))
-                    alt_aa_single = match.group(3)
-
-                    ref_aa = single_to_three.get(ref_aa_single, ref_aa_single)
-                    alt_aa = single_to_three.get(alt_aa_single, alt_aa_single)
+                    alt_aa = match.group(3)
                 else:
-                    # Check for variants like "p.78X" or "p.78*"
-                    stop_pattern = r'p\.(\d+)([X\*])'
-                    match = re.search(stop_pattern, variant_reported)
+                    # Try single-letter code pattern (p.X###X)
+                    protein_pattern_single = r'p\.([A-Z])(\d+)([A-Z\*])'
+                    match = re.search(protein_pattern_single, protein_variant)
+
                     if match:
-                        position = int(match.group(1))
-                        # Skip stop codons without reference amino acid
-                        continue
+                        ref_aa_single = match.group(1)
+                        position = int(match.group(2))
+                        alt_aa_single = match.group(3)
+
+                        ref_aa = single_to_three.get(
+                            ref_aa_single, ref_aa_single
+                        )
+                        alt_aa = single_to_three.get(
+                            alt_aa_single, alt_aa_single
+                        )
                     else:
                         continue
+            else:
+                # Fallback: Try to extract directly without parentheses
+                # Try three-letter code pattern first (p.Xxx###Xxx)
+                protein_pattern_three = (
+                    r'p\.([A-Z][a-z]{2})(\d+)([A-Z][a-z]{2}|Ter|\*)'
+                )
+                match = re.search(protein_pattern_three, varisome_data)
+
+                if match:
+                    ref_aa = match.group(1)
+                    position = int(match.group(2))
+                    alt_aa = match.group(3)
+                else:
+                    # Try single-letter code pattern (p.X###X)
+                    protein_pattern_single = r'p\.([A-Z])(\d+)([A-Z\*])'
+                    match = re.search(protein_pattern_single, varisome_data)
+
+                    if match:
+                        ref_aa_single = match.group(1)
+                        position = int(match.group(2))
+                        alt_aa_single = match.group(3)
+
+                        ref_aa = single_to_three.get(
+                            ref_aa_single, ref_aa_single
+                        )
+                        alt_aa = single_to_three.get(
+                            alt_aa_single, alt_aa_single
+                        )
+                    else:
+                        continue
+
+            # Validate the parsed variant
+            if (ref_aa not in valid_three_letter or
+                    alt_aa not in valid_three_letter):
+                continue
 
             # Format variant name in three-letter code
             variant_name = f'p.{ref_aa}{position}{alt_aa}'
@@ -95,6 +144,11 @@ def extract_snv_variants(csv_file):
                 color = 'grey'
                 type_label = 'Uncertain Significance'
 
+            # Skip termination variants (nonsense variants)
+            # These are typically removed by nonsense-mediated decay
+            if alt_aa == 'Ter':
+                continue
+
             # Create variant object
             variant = {
                 'name': variant_name,
@@ -114,7 +168,7 @@ def extract_snv_variants(csv_file):
 
 
 def generate_js_file(variants, unparsed_variants=None):
-    """Generate JavaScript file with optional unparsed variants as comments."""
+    """Generate JavaScript file with optional unparsed variants."""
     js_content = (
         "// Variant data configuration\n"
         "// Note: distanceToDNA and closestDNAAtom will be populated "
@@ -185,10 +239,17 @@ def generate_js_file(variants, unparsed_variants=None):
 
 
 def extract_snv_variants_with_logging(csv_file):
-    """Extract SNV variants and log any that couldn't be parsed"""
+    """Extract SNV variants and log any that couldn't be parsed."""
     variants = []
     seen_variants = set()
     unparsed_variants = []
+
+    # Valid three-letter amino acid codes for validation
+    valid_three_letter = {
+        'Ala', 'Cys', 'Asp', 'Glu', 'Phe', 'Gly', 'His', 'Ile',
+        'Lys', 'Leu', 'Met', 'Asn', 'Pro', 'Gln', 'Arg', 'Ser',
+        'Thr', 'Val', 'Trp', 'Tyr', 'Ter'
+    }
 
     # Amino acid conversion dictionaries
     single_to_three = {
@@ -206,8 +267,20 @@ def extract_snv_variants_with_logging(csv_file):
             if row['VariantType'] != 'SNV':
                 continue
 
+            # Prioritize Varisome column for accurate extraction
+            varisome_data = row.get('Varsome', '')
             variant_reported = row.get('VariantReported', '')
-            if not variant_reported:
+
+            # Always prioritize Varisome if it contains protein variant
+            if 'p.' in varisome_data:
+                source_data = varisome_data
+            elif varisome_data:
+                source_data = varisome_data
+            else:
+                # Only use VariantReported if Varisome is empty
+                source_data = variant_reported
+
+            if not source_data:
                 continue
 
             parsed = False
@@ -215,24 +288,65 @@ def extract_snv_variants_with_logging(csv_file):
             position = None
             alt_aa = None
 
-            # Try three-letter code pattern first (p.Xxx###Xxx)
-            protein_pattern_three = (
-                r'p\.([A-Z][a-z]{2})(\d+)([A-Z][a-z]{2}|Ter|\*|X)'
-            )
-            match = re.search(protein_pattern_three, variant_reported)
+            # Extract protein variant from Varisome format:
+            # HNF1B(NM_000458.4):c.###X>X (p.XxxYyyZzz)
+            protein_in_parens = r'\(p\.([^)]+)\)'
+            match = re.search(protein_in_parens, source_data)
 
             if match:
-                ref_aa = match.group(1)
-                position = int(match.group(2))
-                alt_aa = match.group(3)
-                if alt_aa == 'X':
-                    alt_aa = 'Ter'
-                parsed = True
+                protein_variant = 'p.' + match.group(1)
+                # Parse the extracted protein variant
+                # Try three-letter code pattern (p.Xxx###Xxx)
+                protein_pattern_three = (
+                    r'p\.([A-Z][a-z]{2})(\d+)([A-Z][a-z]{2}|Ter|\*|X)'
+                )
+                match = re.search(protein_pattern_three, protein_variant)
+
+                if match:
+                    ref_aa = match.group(1)
+                    position = int(match.group(2))
+                    alt_aa = match.group(3)
+                    if alt_aa == 'X':
+                        alt_aa = 'Ter'
+                    parsed = True
+                else:
+                    # Try single-letter code pattern (p.X###X)
+                    protein_pattern_single = r'p\.([A-Z])(\d+)([A-Z\*X])'
+                    match = re.search(protein_pattern_single, protein_variant)
+
+                    if match:
+                        ref_aa_single = match.group(1)
+                        position = int(match.group(2))
+                        alt_aa_single = match.group(3)
+
+                        ref_aa = single_to_three.get(
+                            ref_aa_single, ref_aa_single
+                        )
+                        alt_aa = single_to_three.get(
+                            alt_aa_single, alt_aa_single
+                        )
+                        parsed = True
+
+            if not parsed:
+                # Fallback: Try to extract directly without parentheses
+                # Try three-letter code pattern first (p.Xxx###Xxx)
+                protein_pattern_three = (
+                    r'p\.([A-Z][a-z]{2})(\d+)([A-Z][a-z]{2}|Ter|\*|X)'
+                )
+                match = re.search(protein_pattern_three, source_data)
+
+                if match:
+                    ref_aa = match.group(1)
+                    position = int(match.group(2))
+                    alt_aa = match.group(3)
+                    if alt_aa == 'X':
+                        alt_aa = 'Ter'
+                    parsed = True
 
             if not parsed:
                 # Try single-letter code pattern with p. prefix (p.X###X)
                 protein_pattern_single = r'p\.([A-Z])(\d+)([A-Z\*X])'
-                match = re.search(protein_pattern_single, variant_reported)
+                match = re.search(protein_pattern_single, source_data)
 
                 if match:
                     ref_aa_single = match.group(1)
@@ -247,9 +361,9 @@ def extract_snv_variants_with_logging(csv_file):
                 # Try single-letter code pattern without p. prefix (X###X)
                 protein_pattern_simple = r'([A-Z])(\d+)([A-Z\*X])'
                 # Avoid matching nucleotide changes like c.232G>T
-                if not re.match(r'c\.', variant_reported):
+                if not re.match(r'c\.', source_data):
                     match = re.search(
-                        protein_pattern_simple, variant_reported
+                        protein_pattern_simple, source_data
                     )
 
                     if match:
@@ -270,7 +384,22 @@ def extract_snv_variants_with_logging(csv_file):
                             parsed = True
 
             if not parsed:
-                unparsed_variants.append(variant_reported)
+                # Store the original data for logging
+                unparsed_data = (
+                    varisome_data if varisome_data
+                    else variant_reported
+                )
+                unparsed_variants.append(unparsed_data)
+                continue
+
+            # Validate the parsed variant
+            if (ref_aa not in valid_three_letter or
+                    alt_aa not in valid_three_letter):
+                unparsed_data = (
+                    varisome_data if varisome_data
+                    else variant_reported
+                )
+                unparsed_variants.append(unparsed_data)
                 continue
 
             variant_name = f'p.{ref_aa}{position}{alt_aa}'
@@ -298,6 +427,15 @@ def extract_snv_variants_with_logging(csv_file):
             else:
                 color = 'grey'
                 type_label = 'Uncertain Significance'
+
+            # Skip termination variants (nonsense variants)
+            # These are typically removed by nonsense-mediated decay
+            if alt_aa == 'Ter':
+                # Store as unparsed for documentation
+                unparsed_variants.append(
+                    f"{variant_name} (termination variant)"
+                )
+                continue
 
             variant = {
                 'name': variant_name,
@@ -375,3 +513,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
