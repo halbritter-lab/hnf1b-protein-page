@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HNF1B Statistical Analysis - Distance to DNA</title>
+    
+    <!-- Plotly.js for interactive visualization (v2.27.0 - latest stable) -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <!-- Bootstrap for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .nav-buttons {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .plot-container {
+            padding: 30px;
+            background: white;
+        }
+        
+        #violinPlot {
+            width: 100%;
+            height: 600px;
+        }
+        
+        .stats-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 30px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #212529;
+        }
+        
+        .significance-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: #28a745;
+            color: white;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            margin: 20px 30px;
+            border-radius: 5px;
+        }
+        
+        .legend-custom {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+        
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        
+        .btn-back:hover {
+            background: #5a6268;
+            color: white;
+        }
+        
+        .download-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding: 0 30px 20px;
+        }
+        
+        .control-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 30px;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            min-width: 150px;
+        }
+        
+        .control-group input[type="range"] {
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .control-group .value-display {
+            min-width: 60px;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .btn-download {
+            padding: 8px 16px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-download:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>HNF1B Variant Statistical Analysis</h1>
+            <p>Interactive Visualization of Variant Distance to DNA by Pathogenicity</p>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="nav-buttons">
+            <a href="index.html" class="btn-back">← Back to 3D Viewer</a>
+        </div>
+        
+        <!-- Info Box -->
+        <div class="info-box">
+            <strong>Analysis Overview:</strong> This interactive plot shows the distribution of distances between HNF1B variants 
+            and DNA within the crystallized DNA-binding domain (residues 170-280). The violin plot displays the probability density, 
+            while the embedded box plot shows quartiles and outliers. Each point represents an individual variant.
+            <strong>Hover over points</strong> to see variant details.
+        </div>
+        
+        <!-- Legend -->
+        <div class="legend-custom">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #e74c3c;"></div>
+                <span><strong>P/LP:</strong> Pathogenic/Likely Pathogenic (n=33)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #3498db;"></div>
+                <span><strong>VUS:</strong> Variants of Uncertain Significance (n=33)</span>
+            </div>
+        </div>
+        
+        <!-- Control Panel for Smoothing -->
+        <div class="control-panel">
+            <h4>Visualization Controls</h4>
+            <div class="control-group">
+                <label for="bandwidthSlider">Smoothing (Bandwidth):</label>
+                <input type="range" id="bandwidthSlider" min="0.5" max="5" value="2" step="0.1">
+                <span class="value-display" id="bandwidthValue">2.0</span>
+                <button class="btn-download" onclick="resetBandwidth()">Reset</button>
+            </div>
+            <div style="font-size: 0.9rem; color: #6c757d; margin-top: 10px;">
+                💡 Tip: Lower values reveal more detail and potential subgroups; higher values show smoother overall distribution
+            </div>
+        </div>
+        
+        <!-- Main Plot -->
+        <div class="plot-container">
+            <div id="violinPlot"></div>
+        </div>
+        
+        <!-- Statistics Panel -->
+        <div class="stats-panel">
+            <h3>Statistical Summary</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Mann-Whitney U Test</div>
+                    <div class="stat-value">p = 0.0071</div>
+                    <div class="significance-badge">** Significant</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Effect Size (Cohen's d)</div>
+                    <div class="stat-value">0.729</div>
+                    <div style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">Medium effect</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">P/LP Median Distance</div>
+                    <div class="stat-value">5.37 Å</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">VUS Median Distance</div>
+                    <div class="stat-value">10.33 Å</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Difference in Medians</div>
+                    <div class="stat-value">4.96 Å</div>
+                    <div style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">P/LP closer to DNA</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Sample Size</div>
+                    <div class="stat-value">66 variants</div>
+                    <div style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">33 P/LP, 33 VUS</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Download Buttons -->
+        <div class="download-buttons">
+            <button class="btn-download" onclick="downloadPlot()">Download Plot (PNG)</button>
+            <button class="btn-download" onclick="downloadData()">Download Data (JSON)</button>
+        </div>
+    </div>
+    
+    <script>
+        // Load the variant data
+        async function loadData() {
+            try {
+                const response = await fetch('data/variant-distances.json');
+                const data = await response.json();
+                return data.filter(d => d.distance_to_dna !== null);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                // Fallback to embedded data if file not found
+                return getEmbeddedData();
+            }
+        }
+        
+        // Embedded data fallback
+        function getEmbeddedData() {
+            // This will be populated with actual data
+            return [];
+        }
+        
+        // Global variable for current bandwidth
+        let currentBandwidth = 2.0;
+        
+        // Create the violin plot
+        async function createViolinPlot(bandwidth = 2.0) {
+            const allData = await loadData();
+            
+            // Separate data by group
+            const plpData = allData.filter(d => 
+                d.pathogenicity === 'Pathogenic' || d.pathogenicity === 'Likely Pathogenic'
+            );
+            const vusData = allData.filter(d => 
+                d.pathogenicity === 'Uncertain Significance'
+            );
+            
+            // Create FULL violin plot for P/LP (not split)
+            const trace1 = {
+                type: 'violin',
+                x: Array(plpData.length).fill('P/LP'),  // X position for group
+                y: plpData.map(d => d.distance_to_dna),
+                name: 'P/LP',
+                box: {
+                    visible: true,
+                    width: 0.2,
+                    fillcolor: 'rgba(231, 76, 60, 0.3)',
+                    line: {
+                        color: '#c0392b',
+                        width: 2
+                    }
+                },
+                meanline: {
+                    visible: true,
+                    color: '#c0392b',
+                    width: 3
+                },
+                fillcolor: 'rgba(231, 76, 60, 0.4)',
+                line: {
+                    color: '#e74c3c',
+                    width: 2
+                },
+                opacity: 0.8,
+                points: 'all',
+                pointpos: 0,  // Position points INSIDE the violin (centered)
+                jitter: 0.15,  // Reduced jitter to keep points within violin
+                scalemode: 'width',
+                width: 0.8,
+                bandwidth: bandwidth,  // Control smoothing
+                marker: {
+                    size: 6,
+                    color: 'rgba(231, 76, 60, 0.8)',
+                    line: {
+                        color: 'white',
+                        width: 1
+                    }
+                },
+                text: plpData.map(d => `${d.name}<br>Distance: ${d.distance_to_dna.toFixed(2)} Å`),
+                hovertemplate: '<b>%{text}</b><br>Group: P/LP<extra></extra>',
+                hoverlabel: {
+                    bgcolor: '#e74c3c',
+                    bordercolor: 'white',
+                    font: {color: 'white'}
+                }
+            };
+            
+            // Create FULL violin plot for VUS (not split)
+            const trace2 = {
+                type: 'violin',
+                x: Array(vusData.length).fill('VUS'),  // X position for group
+                y: vusData.map(d => d.distance_to_dna),
+                name: 'VUS',
+                box: {
+                    visible: true,
+                    width: 0.2,
+                    fillcolor: 'rgba(52, 152, 219, 0.3)',
+                    line: {
+                        color: '#2980b9',
+                        width: 2
+                    }
+                },
+                meanline: {
+                    visible: true,
+                    color: '#2980b9',
+                    width: 3
+                },
+                fillcolor: 'rgba(52, 152, 219, 0.4)',
+                line: {
+                    color: '#3498db',
+                    width: 2
+                },
+                opacity: 0.8,
+                points: 'all',
+                pointpos: 0,  // Position points INSIDE the violin (centered)
+                jitter: 0.15,  // Reduced jitter to keep points within violin
+                scalemode: 'width',
+                width: 0.8,
+                bandwidth: bandwidth,  // Control smoothing
+                marker: {
+                    size: 6,
+                    color: 'rgba(52, 152, 219, 0.8)',
+                    line: {
+                        color: 'white',
+                        width: 1
+                    }
+                },
+                text: vusData.map(d => `${d.name}<br>Distance: ${d.distance_to_dna.toFixed(2)} Å`),
+                hovertemplate: '<b>%{text}</b><br>Group: VUS<extra></extra>',
+                hoverlabel: {
+                    bgcolor: '#3498db',
+                    bordercolor: 'white',
+                    font: {color: 'white'}
+                }
+            };
+            
+            // Calculate max y value for positioning annotations
+            const allYValues = [...plpData, ...vusData].map(d => d.distance_to_dna);
+            const maxY = Math.max(...allYValues);
+            const annotationY = maxY + 7;  // Raised higher to ensure clear separation from violin plots
+            
+            // Layout configuration
+            const layout = {
+                title: {
+                    text: 'Variant Distance to DNA by Pathogenicity Group',
+                    font: {
+                        size: 24,
+                        color: '#2c3e50'
+                    },
+                    y: 0.95  // Move title up slightly
+                },
+                yaxis: {
+                    title: {
+                        text: 'Distance to DNA (Å)',
+                        font: {
+                            size: 18,
+                            color: '#2c3e50'
+                        }
+                    },
+                    zeroline: false,
+                    gridcolor: '#ecf0f1',
+                    linecolor: '#95a5a6',
+                    linewidth: 2,
+                    tickfont: {
+                        size: 14
+                    },
+                    range: [0, maxY + 10]  // Extended to accommodate higher bracket
+                },
+                xaxis: {
+                    title: {
+                        text: 'Pathogenicity Group',
+                        font: {
+                            size: 18,
+                            color: '#2c3e50'
+                        }
+                    },
+                    tickfont: {
+                        size: 16,
+                        color: '#2c3e50'
+                    },
+                    linecolor: '#95a5a6',
+                    linewidth: 2
+                },
+                violinmode: 'group',
+                showlegend: false,
+                hovermode: 'closest',
+                plot_bgcolor: '#ffffff',
+                paper_bgcolor: '#ffffff',
+                margin: {
+                    l: 80,
+                    r: 80,
+                    t: 120,  // More space at top
+                    b: 100
+                },
+                annotations: [
+                    // Significance stars above bracket
+                    {
+                        x: 0.5,
+                        y: annotationY + 1.5,
+                        xref: 'x',
+                        yref: 'y',
+                        text: '**',
+                        showarrow: false,
+                        font: {
+                            size: 24,
+                            color: 'black',
+                            family: 'Arial'
+                        },
+                        xanchor: 'center'
+                    },
+                    // P-value text below
+                    {
+                        x: 0.5,
+                        y: -0.12,
+                        xref: 'x',
+                        yref: 'paper',
+                        text: 'Mann-Whitney U: p = 0.0071',
+                        showarrow: false,
+                        font: {
+                            size: 14,
+                            color: '#27ae60',
+                            family: 'Arial'
+                        },
+                        xanchor: 'center'
+                    }
+                ],
+                shapes: [
+                    // Significance bracket - left vertical
+                    {
+                        type: 'line',
+                        x0: 'P/LP',
+                        x1: 'P/LP',
+                        y0: maxY + 5,  // Start even higher for better clearance
+                        y1: annotationY,
+                        xref: 'x',
+                        yref: 'y',
+                        line: {
+                            color: 'black',
+                            width: 2
+                        }
+                    },
+                    // Significance bracket - horizontal
+                    {
+                        type: 'line',
+                        x0: 'P/LP',
+                        x1: 'VUS',
+                        y0: annotationY,
+                        y1: annotationY,
+                        xref: 'x',
+                        yref: 'y',
+                        line: {
+                            color: 'black',
+                            width: 2
+                        }
+                    },
+                    // Significance bracket - right vertical
+                    {
+                        type: 'line',
+                        x0: 'VUS',
+                        x1: 'VUS',
+                        y0: annotationY,
+                        y1: maxY + 5,  // End even higher for better clearance
+                        xref: 'x',
+                        yref: 'y',
+                        line: {
+                            color: 'black',
+                            width: 2
+                        }
+                    }
+                ]
+            };
+            
+            // Configuration
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                displaylogo: false,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d'],
+                toImageButtonOptions: {
+                    format: 'png',
+                    filename: 'hnf1b_variant_distances',
+                    height: 800,
+                    width: 1200,
+                    scale: 2
+                }
+            };
+            
+            // Create the plot
+            Plotly.newPlot('violinPlot', [trace1, trace2], layout, config);
+        }
+        
+        // Download functions
+        function downloadPlot() {
+            Plotly.downloadImage('violinPlot', {
+                format: 'png',
+                width: 1200,
+                height: 800,
+                filename: 'hnf1b_variant_distances'
+            });
+        }
+        
+        async function downloadData() {
+            const data = await loadData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'variant_distances.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Bandwidth slider control
+        document.addEventListener('DOMContentLoaded', function() {
+            const slider = document.getElementById('bandwidthSlider');
+            const valueDisplay = document.getElementById('bandwidthValue');
+            
+            // Initialize plot
+            createViolinPlot(currentBandwidth);
+            
+            // Update plot on slider change
+            slider.addEventListener('input', function() {
+                currentBandwidth = parseFloat(this.value);
+                valueDisplay.textContent = currentBandwidth.toFixed(1);
+            });
+            
+            // Debounced plot update on slider release
+            slider.addEventListener('change', function() {
+                createViolinPlot(currentBandwidth);
+            });
+        });
+        
+        // Reset bandwidth function
+        function resetBandwidth() {
+            currentBandwidth = 2.0;
+            document.getElementById('bandwidthSlider').value = 2.0;
+            document.getElementById('bandwidthValue').textContent = '2.0';
+            createViolinPlot(currentBandwidth);
+        }
+    </script>
+</body>
+</html>
