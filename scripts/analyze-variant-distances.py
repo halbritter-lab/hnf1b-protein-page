@@ -12,21 +12,18 @@ Improvements:
 """
 
 import json
-from typing import Dict, Tuple, Optional
+from typing import Dict
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import seaborn as sns
 from scipy.stats import (
-    kruskal, 
-    mannwhitneyu, 
-    kendalltau,
+    kruskal,
+    mannwhitneyu,
     shapiro,
     levene,
-    spearmanr,
-    ranksums
+    spearmanr
 )
 
 
@@ -55,9 +52,11 @@ def load_variant_data(
     print("DATA LOADING SUMMARY")
     print("=" * 70)
     print(f"Total variants in dataset: {len(df)}")
-    print(f"Variants within PDB structure (residues 170-280): {len(df_filtered)}")
-    print(f"Variants excluded (outside structure): {len(df) - len(df_filtered)}")
-    
+    print(f"Variants within PDB structure (residues 170-280): "
+          f"{len(df_filtered)}")
+    print(f"Variants excluded (outside structure): "
+          f"{len(df) - len(df_filtered)}")
+
     # Show why variants are excluded
     excluded = df[df['distance_to_dna'].isna()]
     if len(excluded) > 0:
@@ -150,7 +149,11 @@ def calculate_summary_statistics(
     return summary
 
 
-def test_assumptions(df: pd.DataFrame, group_col: str, value_col: str = 'distance_to_dna') -> Dict:
+def test_assumptions(
+    df: pd.DataFrame,
+    group_col: str,
+    value_col: str = 'distance_to_dna'
+) -> Dict:
     """
     Test statistical assumptions to determine appropriate tests.
     
@@ -198,14 +201,16 @@ def test_assumptions(df: pd.DataFrame, group_col: str, value_col: str = 'distanc
     
     # Determine appropriate test
     if len(groups) == 2:
-        if all_normal and results.get('levene', {}).get('equal_variance', False):
+        if (all_normal and
+                results.get('levene', {}).get('equal_variance', False)):
             results['recommended_test'] = "Student's t-test"
         elif all_normal:
             results['recommended_test'] = "Welch's t-test"
         else:
             results['recommended_test'] = "Mann-Whitney U test"
     elif len(groups) > 2:
-        if all_normal and results.get('levene', {}).get('equal_variance', False):
+        if (all_normal and
+                results.get('levene', {}).get('equal_variance', False)):
             results['recommended_test'] = "One-way ANOVA"
         else:
             results['recommended_test'] = "Kruskal-Wallis test"
@@ -258,9 +263,12 @@ def perform_statistical_tests(
         cles = u_stat / (n1 * n2)  # Common Language Effect Size
         
         # Cohen's d for reference
-        pooled_std = np.sqrt(((n1-1)*np.var(group_data[group_list[0]], ddof=1) + 
-                             (n2-1)*np.var(group_data[group_list[1]], ddof=1))/(n1+n2-2))
-        cohens_d = (np.mean(group_data[group_list[0]]) - np.mean(group_data[group_list[1]])) / pooled_std
+        pooled_std = np.sqrt(
+            ((n1-1)*np.var(group_data[group_list[0]], ddof=1) +
+             (n2-1)*np.var(group_data[group_list[1]], ddof=1))/(n1+n2-2))
+        cohens_d = (
+            (np.mean(group_data[group_list[0]]) -
+             np.mean(group_data[group_list[1]])) / pooled_std)
         
         results['mann_whitney'] = {
             'groups': group_list,
@@ -333,7 +341,8 @@ def perform_statistical_tests(
                 'p_value': p_value,
                 'significant': p_value < 0.05,
                 'interpretation': (
-                    'Negative correlation (higher pathogenicity = lower distance)'
+                    ('Negative correlation '
+                     '(higher pathogenicity = lower distance)')
                     if rho < 0 else 
                     'Positive correlation' if rho > 0 else 'No correlation'
                 )
@@ -350,7 +359,8 @@ def create_statistical_annotations(
     y_max: float
 ) -> None:
     """
-    Add statistical significance annotations to plot (traditional scientific style).
+    Add statistical significance annotations to plot
+    (traditional scientific style).
 
     Args:
         ax: Matplotlib axis
@@ -377,7 +387,8 @@ def create_statistical_annotations(
                     bracket_height = annotation_y + y_offset/2
                     ax.plot(
                         [x1, x1, x2, x2],
-                        [annotation_y, bracket_height, bracket_height, annotation_y],
+                        [annotation_y, bracket_height,
+                         bracket_height, annotation_y],
                         'k-',
                         linewidth=2
                     )
@@ -393,7 +404,7 @@ def create_statistical_annotations(
                     else:
                         stars = 'ns'
                     
-                    # Add ONLY stars at the center of the bracket (traditional style)
+                    # Add ONLY stars at center of bracket
                     ax.text(
                         (x1 + x2) / 2,
                         bracket_height + 0.2,
@@ -477,7 +488,8 @@ def create_visualization(
 
     ax1.set_xlabel('Pathogenicity Group', fontsize=16)
     ax1.set_ylabel('Distance to DNA (Å)', fontsize=16)
-    ax1.set_title('Box Plot with Individual Points', fontsize=18, fontweight='bold')
+    ax1.set_title('Box Plot with Individual Points',
+                  fontsize=18, fontweight='bold')
     ax1.set_ylim(bottom=y_min - (ax1.get_ylim()[1] - y_min) * 0.15)
 
     # Add statistical annotations for 2-group
@@ -538,12 +550,16 @@ def create_visualization(
     vus_data = df_two[df_two['two_group'] == 'VUS']['distance_to_dna'].values
     
     bins = np.linspace(0, max(plp_data.max(), vus_data.max()) + 2, 12)
-    ax3.hist(plp_data, bins=bins, alpha=0.6, label='P/LP', color='#e74c3c', edgecolor='black', linewidth=1.5)
-    ax3.hist(vus_data, bins=bins, alpha=0.6, label='VUS', color='#3498db', edgecolor='black', linewidth=1.5)
+    ax3.hist(plp_data, bins=bins, alpha=0.6, label='P/LP',
+             color='#e74c3c', edgecolor='black', linewidth=1.5)
+    ax3.hist(vus_data, bins=bins, alpha=0.6, label='VUS',
+             color='#3498db', edgecolor='black', linewidth=1.5)
     
     # Add vertical lines for medians
-    ax3.axvline(np.median(plp_data), color='#e74c3c', linestyle='--', linewidth=3, alpha=0.8)
-    ax3.axvline(np.median(vus_data), color='#3498db', linestyle='--', linewidth=3, alpha=0.8)
+    ax3.axvline(np.median(plp_data), color='#e74c3c',
+                linestyle='--', linewidth=3, alpha=0.8)
+    ax3.axvline(np.median(vus_data), color='#3498db',
+                linestyle='--', linewidth=3, alpha=0.8)
     
     ax3.set_xlabel('Distance to DNA (Å)', fontsize=16)
     ax3.set_ylabel('Frequency', fontsize=16)
@@ -570,8 +586,9 @@ def create_visualization(
         ['Mean ± SE', f'{summary.loc["P/LP", "mean"]:.2f} ± {summary.loc["P/LP", "sem"]:.2f}',
                       f'{summary.loc["VUS", "mean"]:.2f} ± {summary.loc["VUS", "sem"]:.2f}',
                       f'{summary.loc["P/LP", "mean"] - summary.loc["VUS", "mean"]:.2f}'],
-        ['Median', f'{summary.loc["P/LP", "median"]:.2f}', f'{summary.loc["VUS", "median"]:.2f}',
-                   f'{summary.loc["P/LP", "median"] - summary.loc["VUS", "median"]:.2f}'],
+        ['Median', f'{summary.loc["P/LP", "median"]:.2f}',
+         f'{summary.loc["VUS", "median"]:.2f}',
+         f'{summary.loc["P/LP", "median"] - summary.loc["VUS", "median"]:.2f}'],
         ['IQR', f'{summary.loc["P/LP", "iqr"]:.2f}', f'{summary.loc["VUS", "iqr"]:.2f}', ''],
         ['Range', f'{summary.loc["P/LP", "min"]:.1f} - {summary.loc["P/LP", "max"]:.1f}',
                   f'{summary.loc["VUS", "min"]:.1f} - {summary.loc["VUS", "max"]:.1f}', '']
@@ -610,12 +627,14 @@ def create_visualization(
         ['P-value', f'{mw["p_value"]:.4f}', 'Significant' if mw['p_value'] < 0.05 else 'Not significant'],
         ['Effect size (r)', f'{mw["effect_size_r"]:.3f}', 'Medium effect'],
         ['Cohen\'s d', f'{mw["cohens_d"]:.3f}', 'Medium effect'],
-        ['CLES', f'{mw["cles"]:.3f}', f'{(1-mw["cles"])*100:.1f}% overlap']
+        ['CLES', f'{mw["cles"]:.3f}',
+         f'{(1-mw["cles"])*100:.1f}% overlap']
     ]
     
     if 'spearman_correlation' in two_results:
         corr = two_results['spearman_correlation']
-        test_table_data.append(['Spearman ρ', f'{corr["rho"]:.3f}', 'Negative correlation'])
+        test_table_data.append(['Spearman ρ', f'{corr["rho"]:.3f}',
+                                'Negative correlation'])
     
     test_table = ax4b.table(cellText=test_table_data, cellLoc='center', loc='center',
                            colWidths=[0.35, 0.25, 0.4])
@@ -682,11 +701,12 @@ def print_statistical_report(
             print(f"  {group}: p = {norm_data['p_value']:.4f} - {'Normal' if norm_data['normal'] else 'NOT Normal'}")
         
         if 'levene' in assumptions:
-            print(f"\nVariance Homogeneity (Levene's Test):")
+            print("\nVariance Homogeneity (Levene's Test):")
             print(f"  p = {assumptions['levene']['p_value']:.4f} - {'Equal' if assumptions['levene']['equal_variance'] else 'UNEQUAL'} variances")
         
         print(f"\nRecommended test: {assumptions['recommended_test']}")
-        print("Actual test used: Mann-Whitney U (appropriate for non-parametric data)")
+        print("Actual test used: Mann-Whitney U "
+              "(appropriate for non-parametric data)")
 
     # Check if we actually have 3 groups
     three_groups_exist = len(df[df['three_group'].notna()]['three_group'].unique()) > 2
@@ -794,7 +814,7 @@ def print_statistical_report(
 
         print(f"\nResult: {direction}")
         print(f"Explanation: {explanation}")
-        print(f"\nDistance Comparisons:")
+        print("\nDistance Comparisons:")
         print(f"  P/LP: median = {plp_median:.2f} Å, mean = {plp_mean:.2f} Å")
         print(f"  VUS:  median = {vus_median:.2f} Å, mean = {vus_mean:.2f} Å")
         print(f"  Difference in medians: {vus_median - plp_median:.2f} Å")
