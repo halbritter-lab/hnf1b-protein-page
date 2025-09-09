@@ -77,28 +77,23 @@ def create_pathogenicity_groups(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame with additional grouping columns
     """
-    # Three-group classification (theoretical)
-    three_group_map = {
+    # Two-group classification (only P/LP and VUS present in PDB structure)
+    two_group_map = {
         'Pathogenic': 'P/LP',
         'Likely Pathogenic': 'P/LP',
         'Uncertain Significance': 'VUS',
-        'Likely Benign': 'B/LB',
-        'Benign': 'B/LB'
+        'Likely Benign': None,  # Not in PDB structure range
+        'Benign': None  # Not in PDB structure range
     }
 
-    df['three_group'] = df['pathogenicity'].map(three_group_map)
+    df['two_group'] = df['pathogenicity'].map(two_group_map)
     
     # Check what groups actually exist
-    actual_groups = df['three_group'].unique()
+    actual_groups = df['two_group'].dropna().unique()
     print(f"\nGroups present in data: {list(actual_groups)}")
     for group in actual_groups:
-        count = (df['three_group'] == group).sum()
+        count = (df['two_group'] == group).sum()
         print(f"  {group}: {count} variants")
-
-    # Two-group classification (for proper 2-group analysis)
-    df['two_group'] = df['three_group'].apply(
-        lambda x: x if x in ['P/LP', 'VUS'] else None
-    )
 
     # Numerical score for correlation analysis
     pathogenicity_score = {
@@ -174,7 +169,7 @@ def test_assumptions(
         for group in groups
     }
     
-    # Test normality for each group
+    # Test normality for each group with Shapiro-Wilk test
     results['normality'] = {}
     all_normal = True
     for group, data in group_data.items():
@@ -190,7 +185,7 @@ def test_assumptions(
     
     results['all_groups_normal'] = all_normal
     
-    # Test variance homogeneity if more than one group
+    # Test variance homogeneity if more than one group using Levene's test
     if len(groups) > 1:
         stat, p = levene(*group_data.values())
         results['levene'] = {
@@ -294,39 +289,9 @@ def perform_statistical_tests(
             }
         }
     
-    # For 3+ groups: Use Kruskal-Wallis
+    # This shouldn't happen with our data (only 2 groups)
     elif len(groups) > 2:
-        h_stat, p_value = kruskal(*group_data.values())
-        results['kruskal_wallis'] = {
-            'statistic': h_stat,
-            'p_value': p_value,
-            'significant': p_value < 0.05,
-            'test_used': assumptions['recommended_test']
-        }
-        
-        # Pairwise comparisons
-        results['pairwise'] = {}
-        for i, group1 in enumerate(groups):
-            for group2 in groups[i+1:]:
-                u_stat, p_value = mannwhitneyu(
-                    group_data[group1],
-                    group_data[group2],
-                    alternative='two-sided'
-                )
-                
-                n1 = len(group_data[group1])
-                n2 = len(group_data[group2])
-                r = 1 - (2 * u_stat) / (n1 * n2)
-                cles = u_stat / (n1 * n2)
-                
-                comparison = f"{group1}_vs_{group2}"
-                results['pairwise'][comparison] = {
-                    'u_statistic': u_stat,
-                    'p_value': p_value,
-                    'effect_size_r': r,
-                    'cles': cles,
-                    'significant': p_value < 0.05
-                }
+        raise ValueError("Dataset only contains 2 groups (P/LP and VUS) in PDB structure range")
     
     # Add correlation analyses
     if 'pathogenicity_score' in df.columns:
@@ -419,7 +384,7 @@ def create_statistical_annotations(
 def create_visualization(
     df: pd.DataFrame,
     output_file: str = '../output/variant-distance-analysis.png'
-) -> None:
+) -> Dict:
     """
     Create comprehensive visualization for 2-group analysis.
 
@@ -437,11 +402,8 @@ def create_visualization(
     plt.rcParams['ytick.labelsize'] = 14
     plt.rcParams['legend.fontsize'] = 14
 
-    # Create figure with subplots - only 2-group analysis
+    # Create figure with subplots for 2-group analysis
     fig = plt.figure(figsize=(20, 10))
-
-    # We only have 2 groups, so no 3-group analysis needed
-    three_results = {}
 
     # 2-GROUP ANALYSIS (P/LP vs VUS)
     df_two = df[df['two_group'].notna()].copy()
@@ -670,20 +632,18 @@ def create_visualization(
 
     plt.show()
 
-    return three_results, two_results
+    return two_results
 
 
 def print_statistical_report(
     df: pd.DataFrame,
-    three_results: Dict,
     two_results: Dict
 ) -> None:
     """
-    Print comprehensive statistical report.
+    Print comprehensive statistical report for 2-group analysis.
 
     Args:
         df: DataFrame with variant data
-        three_results: Results from 3-group analysis (if available)
         two_results: Results from 2-group analysis
     """
     print("\n" + "=" * 70)
@@ -708,46 +668,8 @@ def print_statistical_report(
         print("Actual test used: Mann-Whitney U "
               "(appropriate for non-parametric data)")
 
-    # Check if we actually have 3 groups
-    three_groups_exist = len(df[df['three_group'].notna()]['three_group'].unique()) > 2
-    
-    if three_groups_exist and three_results:
-        print("\n2. THREE-GROUP ANALYSIS (P/LP vs VUS vs B/LB)")
-        print("-" * 50)
-
-        three_summary = calculate_summary_statistics(
-            df[df['three_group'].notna()],
-            'three_group'
-        )
-        print("\nSummary Statistics:")
-        print(three_summary[['count', 'mean', 'median', 'std', 'min', 'max']])
-
-        if 'kruskal_wallis' in three_results:
-            kw = three_results['kruskal_wallis']
-            print("\nKruskal-Wallis Test:")
-            print(f"  H-statistic: {kw['statistic']:.4f}")
-            print(f"  P-value: {kw['p_value']:.4f}")
-            sig_text = 'SIGNIFICANT' if kw['significant'] else 'Not significant'
-            print(f"  Result: {sig_text}")
-
-        print("\nPairwise Comparisons (Mann-Whitney U):")
-        for comparison, result in three_results.get('pairwise', {}).items():
-            print(f"\n  {comparison.replace('_', ' ')}:")
-            print(f"    U-statistic: {result['u_statistic']:.1f}")
-            print(f"    P-value: {result['p_value']:.4f}")
-            print(f"    Effect size (r): {result['effect_size_r']:.3f}")
-            sig_text = ('SIGNIFICANT' if result['significant']
-                        else 'Not significant')
-            print(f"    Result: {sig_text}")
-    else:
-        print("\n2. THREE-GROUP ANALYSIS")
-        print("-" * 50)
-        print("Not applicable - only 2 groups present in PDB structure range")
-        print("(No Benign/Likely Benign variants within residues 170-280)")
-
     # Summary statistics for 2 groups
-    section_num = "3" if three_groups_exist else "2"
-    print(f"\n\n{section_num}. TWO-GROUP ANALYSIS (P/LP vs VUS)")
+    print("\n\n2. TWO-GROUP ANALYSIS (P/LP vs VUS)")
     print("-" * 50)
 
     two_summary = calculate_summary_statistics(
@@ -843,10 +765,10 @@ def main():
     df = create_pathogenicity_groups(df)
 
     # Perform analysis and create visualizations
-    three_results, two_results = create_visualization(df)
+    two_results = create_visualization(df)
 
     # Print statistical report
-    print_statistical_report(df, three_results, two_results)
+    print_statistical_report(df, two_results)
 
     # Save processed data for further analysis
     output_csv = '../output/variant-distance-processed.csv'
