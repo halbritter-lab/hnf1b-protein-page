@@ -243,8 +243,13 @@
                 <span class="value-display" id="bandwidthValue">2.0</span>
                 <button class="btn-download" onclick="resetBandwidth()">Reset</button>
             </div>
+            <div class="control-group">
+                <label for="errorBarsToggle">Show Error Bars:</label>
+                <input type="checkbox" id="errorBarsToggle" onchange="toggleErrorBars()">
+                <span style="font-size: 0.9rem; color: #6c757d;">Display 95% confidence intervals around means</span>
+            </div>
             <div style="font-size: 0.9rem; color: #6c757d; margin-top: 10px;">
-                💡 Tip: Lower values reveal more detail and potential subgroups; higher values show smoother overall distribution
+                💡 Tip: Lower values reveal more detail and potential subgroups; higher values show smoother overall distribution. Error bars show statistical uncertainty.
             </div>
         </div>
         
@@ -315,11 +320,12 @@
             return [];
         }
         
-        // Global variable for current bandwidth
+        // Global variables for current settings
         let currentBandwidth = 2.0;
+        let showErrorBars = false;
         
         // Create the violin plot
-        async function createViolinPlot(bandwidth = 2.0) {
+        async function createViolinPlot(bandwidth = 2.0, includeErrorBars = false) {
             const allData = await loadData();
             
             // Separate data by group
@@ -427,6 +433,22 @@
                     font: {color: 'white'}
                 }
             };
+            
+            // Calculate statistics for error bars
+            const plpDistances = plpData.map(d => d.distance_to_dna);
+            const vusDistances = vusData.map(d => d.distance_to_dna);
+            
+            const plpMean = plpDistances.reduce((a, b) => a + b, 0) / plpDistances.length;
+            const vusMean = vusDistances.reduce((a, b) => a + b, 0) / vusDistances.length;
+            
+            const plpStd = Math.sqrt(plpDistances.reduce((sq, n) => sq + Math.pow(n - plpMean, 2), 0) / (plpDistances.length - 1));
+            const vusStd = Math.sqrt(vusDistances.reduce((sq, n) => sq + Math.pow(n - vusMean, 2), 0) / (vusDistances.length - 1));
+            
+            const plpSEM = plpStd / Math.sqrt(plpDistances.length);
+            const vusSEM = vusStd / Math.sqrt(vusDistances.length);
+            
+            const plpCI95 = 1.96 * plpSEM;
+            const vusCI95 = 1.96 * vusSEM;
             
             // Calculate max y value for positioning annotations
             const allYValues = [...plpData, ...vusData].map(d => d.distance_to_dna);
@@ -579,8 +601,71 @@
                 }
             };
             
+            // Create error bar traces if enabled
+            const traces = [trace1, trace2];
+            
+            if (includeErrorBars) {
+                // Error bars for P/LP - using darker, more contrasting colors
+                const errorBarPLP = {
+                    type: 'scatter',
+                    x: ['P/LP'],
+                    y: [plpMean],
+                    error_y: {
+                        type: 'data',
+                        array: [plpCI95],
+                        visible: true,
+                        thickness: 3,
+                        width: 10,
+                        color: '#8b0000'  // Dark red for better contrast
+                    },
+                    mode: 'markers',
+                    marker: {
+                        size: 10,
+                        color: '#8b0000',  // Dark red
+                        symbol: 'diamond',
+                        line: {
+                            color: 'white',
+                            width: 1
+                        }
+                    },
+                    name: 'Mean ± 95% CI',
+                    showlegend: false,
+                    hovertemplate: `<b>P/LP Mean</b><br>Mean: ${plpMean.toFixed(2)} Å<br>95% CI: ± ${plpCI95.toFixed(2)} Å<extra></extra>`
+                };
+                
+                // Error bars for VUS - using darker, more contrasting colors
+                const errorBarVUS = {
+                    type: 'scatter',
+                    x: ['VUS'],
+                    y: [vusMean],
+                    error_y: {
+                        type: 'data',
+                        array: [vusCI95],
+                        visible: true,
+                        thickness: 3,
+                        width: 10,
+                        color: '#00008b'  // Dark blue for better contrast
+                    },
+                    mode: 'markers',
+                    marker: {
+                        size: 10,
+                        color: '#00008b',  // Dark blue
+                        symbol: 'diamond',
+                        line: {
+                            color: 'white',
+                            width: 1
+                        }
+                    },
+                    name: 'Mean ± 95% CI',
+                    showlegend: false,
+                    hovertemplate: `<b>VUS Mean</b><br>Mean: ${vusMean.toFixed(2)} Å<br>95% CI: ± ${vusCI95.toFixed(2)} Å<extra></extra>`
+                };
+                
+                traces.push(errorBarPLP, errorBarVUS);
+            }
+            
             // Create the plot
-            Plotly.newPlot('violinPlot', [trace1, trace2], layout, config);
+            Plotly.newPlot('violinPlot', traces, layout, config);
         }
         
         // Download functions
@@ -610,7 +695,7 @@
             const valueDisplay = document.getElementById('bandwidthValue');
             
             // Initialize plot
-            createViolinPlot(currentBandwidth);
+            createViolinPlot(currentBandwidth, showErrorBars);
             
             // Update plot on slider change
             slider.addEventListener('input', function() {
@@ -620,7 +705,7 @@
             
             // Debounced plot update on slider release
             slider.addEventListener('change', function() {
-                createViolinPlot(currentBandwidth);
+                createViolinPlot(currentBandwidth, showErrorBars);
             });
         });
         
@@ -629,7 +714,13 @@
             currentBandwidth = 2.0;
             document.getElementById('bandwidthSlider').value = 2.0;
             document.getElementById('bandwidthValue').textContent = '2.0';
-            createViolinPlot(currentBandwidth);
+            createViolinPlot(currentBandwidth, showErrorBars);
+        }
+        
+        // Toggle error bars function
+        function toggleErrorBars() {
+            showErrorBars = document.getElementById('errorBarsToggle').checked;
+            createViolinPlot(currentBandwidth, showErrorBars);
         }
     </script>
 </body>
