@@ -9,23 +9,38 @@
     height: 80vh;
 }
 
-#reset-view-btn {
-    display: block;
-    width: 100%;
-    padding: 10px;
+.button-group {
+    display: flex;
+    gap: 10px;
     margin-bottom: 15px;
+}
+
+.button-group button {
+    flex: 1;
+    padding: 10px;
     font-size: 1em;
     font-weight: bold;
     color: #fff;
-    background-color: #007bff;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
+#reset-view-btn {
+    background-color: #007bff;
+}
+
 #reset-view-btn:hover {
     background-color: #0056b3;
+}
+
+#view-statistics-btn {
+    background-color: #28a745;
+}
+
+#view-statistics-btn:hover {
+    background-color: #218838;
 }
 
 #variant-list {

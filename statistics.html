@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HNF1B Statistical Analysis - Distance to DNA</title>
+    
+    <!-- Plotly.js for interactive visualization (v2.27.0 - latest stable) -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <!-- Custom CSS files -->
+    <link rel="stylesheet" href="css/statistics.css">
+    <link rel="stylesheet" href="css/statistics-controls.css">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>HNF1B Variant Statistical Analysis</h1>
+            <p>Interactive Visualization of Variant Distance to DNA by Pathogenicity</p>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="nav-buttons">
+            <a href="index.html" class="btn-back">← Back to 3D Viewer</a>
+        </div>
+        
+        <!-- Info Box -->
+        <div class="info-box">
+            <strong>Analysis Overview:</strong> This interactive plot shows the distribution of distances between HNF1B variants 
+            and DNA within the crystallized DNA-binding domain (residues 170-280). The violin plot displays the probability density, 
+            while the embedded box plot shows quartiles and outliers. Each point represents an individual variant.
+            <strong>Hover over points</strong> to see variant details.
+        </div>
+        
+        <!-- Legend -->
+        <div class="legend-custom">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #e74c3c;"></div>
+                <span><strong>P/LP:</strong> Pathogenic/Likely Pathogenic (n=33)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #3498db;"></div>
+                <span><strong>VUS:</strong> Variants of Uncertain Significance (n=33)</span>
+            </div>
+        </div>
+        
+        <!-- Control Panel for Smoothing -->
+        <div class="control-panel">
+            <h4>Visualization Controls</h4>
+            <div class="control-group">
+                <label for="bandwidthSlider">Smoothing (Bandwidth):</label>
+                <input type="range" id="bandwidthSlider" min="0.5" max="5" value="2" step="0.1">
+                <span class="value-display" id="bandwidthValue">2.0</span>
+                <button class="btn-reset" onclick="resetBandwidth()">Reset</button>
+            </div>
+            <div class="control-group">
+                <label for="errorBarsToggle">Show Error Bars:</label>
+                <input type="checkbox" id="errorBarsToggle" onchange="toggleErrorBars()">
+                <span class="control-description">Display 95% confidence intervals around means</span>
+            </div>
+            <div class="control-tip">
+                💡 Tip: Lower values reveal more detail and potential subgroups; higher values show smoother overall distribution. Error bars show statistical uncertainty.
+            </div>
+        </div>
+        
+        <!-- Main Plot -->
+        <div class="plot-container">
+            <div id="violinPlot"></div>
+        </div>
+        
+        <!-- Statistics Panel -->
+        <div class="stats-panel">
+            <h3>Statistical Summary</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Mann-Whitney U Test</div>
+                    <div class="stat-value">p = 0.0071</div>
+                    <div class="significance-badge">** Significant</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Effect Size (Cohen's d)</div>
+                    <div class="stat-value">0.729</div>
+                    <div style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">Medium effect</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">P/LP Median Distance</div>
+                    <div class="stat-value">5.37 Å</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">VUS Median Distance</div>
+                    <div class="stat-value">10.33 Å</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Difference in Medians</div>
+                    <div class="stat-value">4.96 Å</div>
+                    <div style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">P/LP closer to DNA</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Sample Size</div>
+                    <div class="stat-value">66 variants</div>
+                    <div style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">33 P/LP, 33 VUS</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Download Buttons -->
+        <div class="download-buttons">
+            <button class="btn-download" onclick="downloadPlot()">Download Plot (PNG)</button>
+            <button class="btn-download" onclick="downloadData()">Download Data (JSON)</button>
+        </div>
+    </div>
+    
+    <script>
+        // Load the variant data
+        async function loadData() {
+            try {
+                const response = await fetch('data/variant-distances.json');
+                const data = await response.json();
+                return data.filter(d => d.distance_to_dna !== null);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                // Fallback to embedded data if file not found
+                return getEmbeddedData();
+            }
+        }
+        
+        // Embedded data fallback
+        function getEmbeddedData() {
+            // This will be populated with actual data
+            return [];
+        }
+        
+        // Global variables for current settings
+        let currentBandwidth = 2.0;
+        let showErrorBars = false;
+        
+        // Create the violin plot
+        async function createViolinPlot(bandwidth = 2.0, includeErrorBars = false) {
+            const allData = await loadData();
+            
+            // Separate data by group
+            const plpData = allData.filter(d => 
+                d.pathogenicity === 'Pathogenic' || d.pathogenicity === 'Likely Pathogenic'
+            );
+            const vusData = allData.filter(d => 
+                d.pathogenicity === 'Uncertain Significance'
+            );
+            
+            // Create FULL violin plot for P/LP (not split)
+            const trace1 = {
+                type: 'violin',
+                x: Array(plpData.length).fill('P/LP'),  // X position for group
+                y: plpData.map(d => d.distance_to_dna),
+                name: 'P/LP',
+                box: {
+                    visible: true,
+                    width: 0.2,
+                    fillcolor: 'rgba(231, 76, 60, 0.3)',
+                    line: {
+                        color: '#c0392b',
+                        width: 2
+                    }
+                },
+                meanline: {
+                    visible: true,
+                    color: '#c0392b',
+                    width: 3
+                },
+                fillcolor: 'rgba(231, 76, 60, 0.4)',
+                line: {
+                    color: '#e74c3c',
+                    width: 2
+                },
+                opacity: 0.8,
+                points: 'all',
+                pointpos: 0,  // Position points INSIDE the violin (centered)
+                jitter: 0.3,  // Increased jitter for better point separation
+                scalemode: 'width',
+                width: 0.8,
+                bandwidth: bandwidth,  // Control smoothing
+                marker: {
+                    size: 10,
+                    color: 'rgba(231, 76, 60, 0.8)',
+                    line: {
+                        color: 'white',
+                        width: 1
+                    }
+                },
+                text: plpData.map(d => `${d.name}<br>Distance: ${d.distance_to_dna.toFixed(2)} Å`),
+                hovertemplate: '<b>%{text}</b><br>Group: P/LP<extra></extra>',
+                hoverlabel: {
+                    bgcolor: '#e74c3c',
+                    bordercolor: 'white',
+                    font: {color: 'white'}
+                }
+            };
+            
+            // Create FULL violin plot for VUS (not split)
+            const trace2 = {
+                type: 'violin',
+                x: Array(vusData.length).fill('VUS'),  // X position for group
+                y: vusData.map(d => d.distance_to_dna),
+                name: 'VUS',
+                box: {
+                    visible: true,
+                    width: 0.2,
+                    fillcolor: 'rgba(52, 152, 219, 0.3)',
+                    line: {
+                        color: '#2980b9',
+                        width: 2
+                    }
+                },
+                meanline: {
+                    visible: true,
+                    color: '#2980b9',
+                    width: 3
+                },
+                fillcolor: 'rgba(52, 152, 219, 0.4)',
+                line: {
+                    color: '#3498db',
+                    width: 2
+                },
+                opacity: 0.8,
+                points: 'all',
+                pointpos: 0,  // Position points INSIDE the violin (centered)
+                jitter: 0.3,  // Increased jitter for better point separation
+                scalemode: 'width',
+                width: 0.8,
+                bandwidth: bandwidth,  // Control smoothing
+                marker: {
+                    size: 10,
+                    color: 'rgba(52, 152, 219, 0.8)',
+                    line: {
+                        color: 'white',
+                        width: 1
+                    }
+                },
+                text: vusData.map(d => `${d.name}<br>Distance: ${d.distance_to_dna.toFixed(2)} Å`),
+                hovertemplate: '<b>%{text}</b><br>Group: VUS<extra></extra>',
+                hoverlabel: {
+                    bgcolor: '#3498db',
+                    bordercolor: 'white',
+                    font: {color: 'white'}
+                }
+            };
+            
+            // Calculate statistics for error bars
+            const plpDistances = plpData.map(d => d.distance_to_dna);
+            const vusDistances = vusData.map(d => d.distance_to_dna);
+            
+            const plpMean = plpDistances.reduce((a, b) => a + b, 0) / plpDistances.length;
+            const vusMean = vusDistances.reduce((a, b) => a + b, 0) / vusDistances.length;
+            
+            const plpStd = Math.sqrt(plpDistances.reduce((sq, n) => sq + Math.pow(n - plpMean, 2), 0) / (plpDistances.length - 1));
+            const vusStd = Math.sqrt(vusDistances.reduce((sq, n) => sq + Math.pow(n - vusMean, 2), 0) / (vusDistances.length - 1));
+            
+            const plpSEM = plpStd / Math.sqrt(plpDistances.length);
+            const vusSEM = vusStd / Math.sqrt(vusDistances.length);
+            
+            const plpCI95 = 1.96 * plpSEM;
+            const vusCI95 = 1.96 * vusSEM;
+            
+            // Calculate max y value for positioning annotations
+            const allYValues = [...plpData, ...vusData].map(d => d.distance_to_dna);
+            const maxY = Math.max(...allYValues);
+            const annotationY = maxY + 7;  // Raised higher to ensure clear separation from violin plots
+            
+            // Layout configuration
+            const layout = {
+                title: {
+                    text: 'Variant Distance to DNA by Pathogenicity Group',
+                    font: {
+                        size: 24,
+                        color: '#2c3e50'
+                    },
+                    y: 0.95  // Move title up slightly
+                },
+                yaxis: {
+                    title: {
+                        text: 'Distance to DNA (Å)',
+                        font: {
+                            size: 18,
+                            color: '#2c3e50'
+                        }
+                    },
+                    zeroline: false,
+                    gridcolor: '#ecf0f1',
+                    linecolor: '#95a5a6',
+                    linewidth: 2,
+                    tickfont: {
+                        size: 14
+                    },
+                    range: [0, maxY + 10]  // Extended to accommodate higher bracket
+                },
+                xaxis: {
+                    title: {
+                        text: 'Pathogenicity Group',
+                        font: {
+                            size: 18,
+                            color: '#2c3e50'
+                        }
+                    },
+                    tickfont: {
+                        size: 16,
+                        color: '#2c3e50'
+                    },
+                    linecolor: '#95a5a6',
+                    linewidth: 2
+                },
+                violinmode: 'group',
+                showlegend: false,
+                hovermode: 'closest',
+                plot_bgcolor: '#ffffff',
+                paper_bgcolor: '#ffffff',
+                margin: {
+                    l: 80,
+                    r: 80,
+                    t: 120,  // More space at top
+                    b: 100
+                },
+                annotations: [
+                    // Significance stars above bracket
+                    {
+                        x: 0.5,
+                        y: annotationY + 1.5,
+                        xref: 'x',
+                        yref: 'y',
+                        text: '**',
+                        showarrow: false,
+                        font: {
+                            size: 24,
+                            color: 'black',
+                            family: 'Arial'
+                        },
+                        xanchor: 'center'
+                    },
+                    // P-value text below
+                    {
+                        x: 0.5,
+                        y: -0.12,
+                        xref: 'x',
+                        yref: 'paper',
+                        text: 'Mann-Whitney U: p = 0.0071',
+                        showarrow: false,
+                        font: {
+                            size: 14,
+                            color: '#27ae60',
+                            family: 'Arial'
+                        },
+                        xanchor: 'center'
+                    }
+                ],
+                shapes: [
+                    // Significance bracket - left vertical
+                    {
+                        type: 'line',
+                        x0: 'P/LP',
+                        x1: 'P/LP',
+                        y0: maxY + 5,  // Start even higher for better clearance
+                        y1: annotationY,
+                        xref: 'x',
+                        yref: 'y',
+                        line: {
+                            color: 'black',
+                            width: 2
+                        }
+                    },
+                    // Significance bracket - horizontal
+                    {
+                        type: 'line',
+                        x0: 'P/LP',
+                        x1: 'VUS',
+                        y0: annotationY,
+                        y1: annotationY,
+                        xref: 'x',
+                        yref: 'y',
+                        line: {
+                            color: 'black',
+                            width: 2
+                        }
+                    },
+                    // Significance bracket - right vertical
+                    {
+                        type: 'line',
+                        x0: 'VUS',
+                        x1: 'VUS',
+                        y0: annotationY,
+                        y1: maxY + 5,  // End even higher for better clearance
+                        xref: 'x',
+                        yref: 'y',
+                        line: {
+                            color: 'black',
+                            width: 2
+                        }
+                    }
+                ]
+            };
+            
+            // Configuration
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                displaylogo: false,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d'],
+                toImageButtonOptions: {
+                    format: 'png',
+                    filename: 'hnf1b_variant_distances',
+                    height: 800,
+                    width: 1200,
+                    scale: 2
+                }
+            };
+            
+            // Create error bar traces if enabled
+            const traces = [trace1, trace2];
+            
+            if (includeErrorBars) {
+                // Error bars for P/LP - using darker, more contrasting colors
+                const errorBarPLP = {
+                    type: 'scatter',
+                    x: ['P/LP'],
+                    y: [plpMean],
+                    error_y: {
+                        type: 'data',
+                        array: [plpCI95],
+                        visible: true,
+                        thickness: 3,
+                        width: 10,
+                        color: '#8b0000'  // Dark red for better contrast
+                    },
+                    mode: 'markers',
+                    marker: {
+                        size: 10,
+                        color: '#8b0000',  // Dark red
+                        symbol: 'diamond',
+                        line: {
+                            color: 'white',
+                            width: 1
+                        }
+                    },
+                    name: 'Mean ± 95% CI',
+                    showlegend: false,
+                    hovertemplate: `<b>P/LP Mean</b><br>Mean: ${plpMean.toFixed(2)} Å<br>95% CI: ± ${plpCI95.toFixed(2)} Å<extra></extra>`
+                };
+                
+                // Error bars for VUS - using darker, more contrasting colors
+                const errorBarVUS = {
+                    type: 'scatter',
+                    x: ['VUS'],
+                    y: [vusMean],
+                    error_y: {
+                        type: 'data',
+                        array: [vusCI95],
+                        visible: true,
+                        thickness: 3,
+                        width: 10,
+                        color: '#00008b'  // Dark blue for better contrast
+                    },
+                    mode: 'markers',
+                    marker: {
+                        size: 10,
+                        color: '#00008b',  // Dark blue
+                        symbol: 'diamond',
+                        line: {
+                            color: 'white',
+                            width: 1
+                        }
+                    },
+                    name: 'Mean ± 95% CI',
+                    showlegend: false,
+                    hovertemplate: `<b>VUS Mean</b><br>Mean: ${vusMean.toFixed(2)} Å<br>95% CI: ± ${vusCI95.toFixed(2)} Å<extra></extra>`
+                };
+                
+                traces.push(errorBarPLP, errorBarVUS);
+            }
+            
+            // Create the plot
+            Plotly.newPlot('violinPlot', traces, layout, config);
+        }
+        
+        // Download functions
+        function downloadPlot() {
+            Plotly.downloadImage('violinPlot', {
+                format: 'png',
+                width: 1200,
+                height: 800,
+                filename: 'hnf1b_variant_distances'
+            });
+        }
+        
+        async function downloadData() {
+            const data = await loadData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'variant_distances.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Bandwidth slider control
+        document.addEventListener('DOMContentLoaded', function() {
+            const slider = document.getElementById('bandwidthSlider');
+            const valueDisplay = document.getElementById('bandwidthValue');
+            
+            // Initialize plot
+            createViolinPlot(currentBandwidth, showErrorBars);
+            
+            // Update plot on slider change
+            slider.addEventListener('input', function() {
+                currentBandwidth = parseFloat(this.value);
+                valueDisplay.textContent = currentBandwidth.toFixed(1);
+            });
+            
+            // Debounced plot update on slider release
+            slider.addEventListener('change', function() {
+                createViolinPlot(currentBandwidth, showErrorBars);
+            });
+        });
+        
+        // Reset bandwidth function
+        function resetBandwidth() {
+            currentBandwidth = 2.0;
+            document.getElementById('bandwidthSlider').value = 2.0;
+            document.getElementById('bandwidthValue').textContent = '2.0';
+            createViolinPlot(currentBandwidth, showErrorBars);
+        }
+        
+        // Toggle error bars function
+        function toggleErrorBars() {
+            showErrorBars = document.getElementById('errorBarsToggle').checked;
+            createViolinPlot(currentBandwidth, showErrorBars);
+        }
+    </script>
+</body>
+</html>
