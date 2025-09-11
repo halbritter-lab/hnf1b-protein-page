@@ -1,10 +1,10 @@
 /* Variant list and UI styles */
 .variant-container {
     flex: 2;
-    padding: 15px;
+    padding: 20px;
     background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    border-radius: 15px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
     overflow-y: auto;
     height: 80vh;
 }
@@ -17,30 +17,34 @@
 
 .button-group button {
     flex: 1;
-    padding: 10px;
+    padding: 10px 20px;
     font-size: 1em;
-    font-weight: bold;
+    font-weight: 500;
     color: #fff;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
 }
 
 #reset-view-btn {
-    background-color: #007bff;
+    background-color: var(--primary-color, #667eea);
 }
 
 #reset-view-btn:hover {
-    background-color: #0056b3;
+    background-color: var(--primary-dark, #5a6fc8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 #view-statistics-btn {
-    background-color: #28a745;
+    background-color: var(--success-color, #28a745);
 }
 
 #view-statistics-btn:hover {
-    background-color: #218838;
+    background-color: var(--success-dark, #218838);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
 }
 
 #variant-list {
@@ -60,7 +64,7 @@
 }
 
 #variant-list li:not(.disabled):hover {
-    background-color: #eef2ff;
+    background-color: rgba(102, 126, 234, 0.1);
 }
 
 #variant-list li.disabled {

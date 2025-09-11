@@ -3,7 +3,8 @@
     flex: 3;
     height: 80vh;
     position: relative;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    border-radius: 15px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
     background-color: white;
+    padding: 10px;
 }
