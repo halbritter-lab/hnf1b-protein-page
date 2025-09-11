@@ -6,7 +6,7 @@ are more likely to be pathogenic in HNF1B protein.
 
 Improvements:
 - Proper handling of 2-group vs 3-group analysis
-- Statistical test validation based on data characteristics  
+- Statistical test validation based on data characteristics
 - Fixed visualization issues (n values placement, exact p-values)
 - Added effect sizes and comprehensive statistics
 """
@@ -19,7 +19,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import (
-    kruskal,
     mannwhitneyu,
     shapiro,
     levene,
@@ -87,7 +86,7 @@ def create_pathogenicity_groups(df: pd.DataFrame) -> pd.DataFrame:
     }
 
     df['two_group'] = df['pathogenicity'].map(two_group_map)
-    
+
     # Check what groups actually exist
     actual_groups = df['two_group'].dropna().unique()
     print(f"\nGroups present in data: {list(actual_groups)}")
@@ -151,24 +150,24 @@ def test_assumptions(
 ) -> Dict:
     """
     Test statistical assumptions to determine appropriate tests.
-    
+
     Args:
         df: DataFrame with variant data
         group_col: Column name for grouping
         value_col: Column name for values to test
-        
+
     Returns:
         Dictionary with assumption test results
     """
     results = {}
-    
+
     # Get data for each group
     groups = df[group_col].dropna().unique()
     group_data = {
         group: df[df[group_col] == group][value_col].values
         for group in groups
     }
-    
+
     # Test normality for each group with Shapiro-Wilk test
     results['normality'] = {}
     all_normal = True
@@ -182,9 +181,9 @@ def test_assumptions(
             }
             if p <= 0.05:
                 all_normal = False
-    
+
     results['all_groups_normal'] = all_normal
-    
+
     # Test variance homogeneity if more than one group using Levene's test
     if len(groups) > 1:
         stat, p = levene(*group_data.values())
@@ -193,7 +192,7 @@ def test_assumptions(
             'p_value': p,
             'equal_variance': p > 0.05
         }
-    
+
     # Determine appropriate test
     if len(groups) == 2:
         if (all_normal and
@@ -209,7 +208,7 @@ def test_assumptions(
             results['recommended_test'] = "One-way ANOVA"
         else:
             results['recommended_test'] = "Kruskal-Wallis test"
-    
+
     return results
 
 
@@ -237,7 +236,7 @@ def perform_statistical_tests(
         group: df[df[group_col] == group][value_col].values
         for group in groups
     }
-    
+
     # Test assumptions first
     assumptions = test_assumptions(df, group_col, value_col)
     results['assumptions'] = assumptions
@@ -250,13 +249,13 @@ def perform_statistical_tests(
             group_data[group_list[1]],
             alternative='two-sided'
         )
-        
+
         # Calculate effect sizes
         n1 = len(group_data[group_list[0]])
         n2 = len(group_data[group_list[1]])
         r = 1 - (2 * u_stat) / (n1 * n2)  # Rank-biserial correlation
         cles = u_stat / (n1 * n2)  # Common Language Effect Size
-        
+
         # Cohen's d for reference
         pooled_std = np.sqrt(
             ((n1-1)*np.var(group_data[group_list[0]], ddof=1) +
@@ -264,7 +263,7 @@ def perform_statistical_tests(
         cohens_d = (
             (np.mean(group_data[group_list[0]]) -
              np.mean(group_data[group_list[1]])) / pooled_std)
-        
+
         results['mann_whitney'] = {
             'groups': group_list,
             'u_statistic': u_stat,
@@ -275,7 +274,7 @@ def perform_statistical_tests(
             'significant': p_value < 0.05,
             'test_used': assumptions['recommended_test']
         }
-        
+
         # Also add as pairwise for compatibility
         comparison = f"{group_list[0]}_vs_{group_list[1]}"
         results['pairwise'] = {
@@ -288,11 +287,14 @@ def perform_statistical_tests(
                 'significant': p_value < 0.05
             }
         }
-    
+
     # This shouldn't happen with our data (only 2 groups)
     elif len(groups) > 2:
-        raise ValueError("Dataset only contains 2 groups (P/LP and VUS) in PDB structure range")
-    
+        raise ValueError(
+            "Dataset only contains 2 groups (P/LP and VUS) "
+            "in PDB structure range"
+        )
+
     # Add correlation analyses
     if 'pathogenicity_score' in df.columns:
         df_corr = df[df['pathogenicity_score'].notna() & df[value_col].notna()]
@@ -308,7 +310,7 @@ def perform_statistical_tests(
                 'interpretation': (
                     ('Negative correlation '
                      '(higher pathogenicity = lower distance)')
-                    if rho < 0 else 
+                    if rho < 0 else
                     'Positive correlation' if rho > 0 else 'No correlation'
                 )
             }
@@ -368,7 +370,7 @@ def create_statistical_annotations(
                         stars = '*'
                     else:
                         stars = 'ns'
-                    
+
                     # Add ONLY stars at center of bracket
                     ax.text(
                         (x1 + x2) / 2,
@@ -412,7 +414,7 @@ def create_visualization(
     # Create a 2x2 grid plus side panels for tables
     # Left: box plot and violin plot
     # Right: tables (wider for better readability)
-    
+
     # 1. Box plot with swarm (larger)
     ax1 = plt.subplot(2, 2, 1)
     sns.boxplot(
@@ -496,129 +498,154 @@ def create_visualization(
         data = df_two[df_two['two_group'] == group]['distance_to_dna'].values
         median = np.median(data)
         mean = np.mean(data)
-        ax2.text(i, ax2.get_ylim()[1] - 2, 
-                f'μ={mean:.1f}\nM={median:.1f}',
-                ha='center', fontsize=13,
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.9))
-    
+        ax2.text(i, ax2.get_ylim()[1] - 2,
+                 f'μ={mean:.1f}\nM={median:.1f}',
+                 ha='center', fontsize=13,
+                 bbox=dict(boxstyle='round', facecolor='white', alpha=0.9))
+
     ax2.set_xlabel('Pathogenicity Group', fontsize=16)
     ax2.set_ylabel('Distance to DNA (Å)', fontsize=16)
     ax2.set_title('Distribution Comparison', fontsize=18, fontweight='bold')
-    
+
     # 3. Histogram comparison (bottom left)
     ax3 = plt.subplot(2, 2, 3)
-    
+
     plp_data = df_two[df_two['two_group'] == 'P/LP']['distance_to_dna'].values
     vus_data = df_two[df_two['two_group'] == 'VUS']['distance_to_dna'].values
-    
+
     bins = np.linspace(0, max(plp_data.max(), vus_data.max()) + 2, 12)
     ax3.hist(plp_data, bins=bins, alpha=0.6, label='P/LP',
              color='#e74c3c', edgecolor='black', linewidth=1.5)
     ax3.hist(vus_data, bins=bins, alpha=0.6, label='VUS',
              color='#3498db', edgecolor='black', linewidth=1.5)
-    
+
     # Add vertical lines for medians
     ax3.axvline(np.median(plp_data), color='#e74c3c',
                 linestyle='--', linewidth=3, alpha=0.8)
     ax3.axvline(np.median(vus_data), color='#3498db',
                 linestyle='--', linewidth=3, alpha=0.8)
-    
+
     ax3.set_xlabel('Distance to DNA (Å)', fontsize=16)
     ax3.set_ylabel('Frequency', fontsize=16)
     ax3.set_title('Distribution Overlap', fontsize=18, fontweight='bold')
     ax3.legend(fontsize=14, loc='upper right')
     ax3.grid(True, alpha=0.3)
-    
+
     # 4. Combined tables (bottom right - wider for better readability)
     ax4 = plt.subplot(2, 2, 4)
     ax4.axis('off')
-    
+
     # Create two sub-axes for the two tables
     # Summary statistics table (top half of ax4)
     ax4a = plt.axes([0.55, 0.28, 0.4, 0.18])  # [left, bottom, width, height]
     ax4a.axis('tight')
     ax4a.axis('off')
-    
-    summary = calculate_summary_statistics(df_two, 'two_group')
-    
+
+    summary = calculate_summary_statistics(
+        df_two,
+        'two_group'
+    )
+
+    # Calculate differences for table
+    mean_diff = summary.loc['P/LP', 'mean'] - summary.loc['VUS', 'mean']
+    median_diff = summary.loc['P/LP', 'median'] - summary.loc['VUS', 'median']
+
     # Create summary statistics table with better spacing
     table_data = [
         ['Statistic', 'P/LP', 'VUS', 'Difference'],
-        ['n', f'{int(summary.loc["P/LP", "count"])}', f'{int(summary.loc["VUS", "count"])}', ''],
-        ['Mean ± SE', f'{summary.loc["P/LP", "mean"]:.2f} ± {summary.loc["P/LP", "sem"]:.2f}',
-                      f'{summary.loc["VUS", "mean"]:.2f} ± {summary.loc["VUS", "sem"]:.2f}',
-                      f'{summary.loc["P/LP", "mean"] - summary.loc["VUS", "mean"]:.2f}'],
-        ['Median', f'{summary.loc["P/LP", "median"]:.2f}',
+        ['n', f'{int(summary.loc["P/LP", "count"])}',
+         f'{int(summary.loc["VUS", "count"])}', ''],
+        ['Mean ± SE',
+         f'{summary.loc["P/LP", "mean"]:.2f} ± '
+         f'{summary.loc["P/LP", "sem"]:.2f}',
+         f'{summary.loc["VUS", "mean"]:.2f} ± '
+         f'{summary.loc["VUS", "sem"]:.2f}',
+         f'{mean_diff:.2f}'],
+        ['Median',
+         f'{summary.loc["P/LP", "median"]:.2f}',
          f'{summary.loc["VUS", "median"]:.2f}',
-         f'{summary.loc["P/LP", "median"] - summary.loc["VUS", "median"]:.2f}'],
-        ['IQR', f'{summary.loc["P/LP", "iqr"]:.2f}', f'{summary.loc["VUS", "iqr"]:.2f}', ''],
-        ['Range', f'{summary.loc["P/LP", "min"]:.1f} - {summary.loc["P/LP", "max"]:.1f}',
-                  f'{summary.loc["VUS", "min"]:.1f} - {summary.loc["VUS", "max"]:.1f}', '']
+         f'{median_diff:.2f}'],
+        ['IQR',
+         f'{summary.loc["P/LP", "iqr"]:.2f}',
+         f'{summary.loc["VUS", "iqr"]:.2f}', ''],
+        ['Range',
+         f'{summary.loc["P/LP", "min"]:.1f} - '
+         f'{summary.loc["P/LP", "max"]:.1f}',
+         f'{summary.loc["VUS", "min"]:.1f} - '
+         f'{summary.loc["VUS", "max"]:.1f}', '']
     ]
-    
-    table = ax4a.table(cellText=table_data, cellLoc='center', loc='center',
-                      colWidths=[0.3, 0.23, 0.23, 0.24])
+
+    table = ax4a.table(cellText=table_data, cellLoc='center',
+                       loc='center',
+                       colWidths=[0.3, 0.23, 0.23, 0.24])
     table.auto_set_font_size(False)
     table.set_fontsize(13)
     table.scale(1.2, 1.8)  # Make table cells taller
-    
+
     # Style header row
     for i in range(4):
         table[(0, i)].set_facecolor('#34495e')
         table[(0, i)].set_text_props(weight='bold', color='white')
-    
+
     # Highlight difference column
     for row in [2, 3]:
         if table_data[row][3]:
             table[(row, 3)].set_facecolor('#f0f0f0')
-    
-    ax4a.set_title('Summary Statistics', fontsize=18, fontweight='bold', y=1.15)
-    
+
+    ax4a.set_title('Summary Statistics', fontsize=18,
+                   fontweight='bold', y=1.15)
+
     # Test results table (bottom half of ax4)
     ax4b = plt.axes([0.55, 0.05, 0.4, 0.18])  # [left, bottom, width, height]
     ax4b.axis('tight')
     ax4b.axis('off')
-    
+
     # Extract test results
-    mw = two_results['pairwise'][f'{two_group_order[0]}_vs_{two_group_order[1]}']
-    
+    pairwise_key = f'{two_group_order[0]}_vs_{two_group_order[1]}'
+    mw = two_results['pairwise'][pairwise_key]
+
     # Create test results table
     test_table_data = [
         ['Statistical Test', 'Value', 'Interpretation'],
         ['Mann-Whitney U', f'{mw["u_statistic"]:.0f}', ''],
-        ['P-value', f'{mw["p_value"]:.4f}', 'Significant' if mw['p_value'] < 0.05 else 'Not significant'],
+        ['P-value', f'{mw["p_value"]:.4f}',
+         'Significant' if mw['p_value'] < 0.05
+         else 'Not significant'],
         ['Effect size (r)', f'{mw["effect_size_r"]:.3f}', 'Medium effect'],
         ['Cohen\'s d', f'{mw["cohens_d"]:.3f}', 'Medium effect'],
         ['CLES', f'{mw["cles"]:.3f}',
          f'{(1-mw["cles"])*100:.1f}% overlap']
     ]
-    
+
     if 'spearman_correlation' in two_results:
         corr = two_results['spearman_correlation']
         test_table_data.append(['Spearman ρ', f'{corr["rho"]:.3f}',
                                 'Negative correlation'])
-    
-    test_table = ax4b.table(cellText=test_table_data, cellLoc='center', loc='center',
-                           colWidths=[0.35, 0.25, 0.4])
+
+    test_table = ax4b.table(cellText=test_table_data,
+                            cellLoc='center', loc='center',
+                            colWidths=[0.35, 0.25, 0.4])
     test_table.auto_set_font_size(False)
     test_table.set_fontsize(13)
     test_table.scale(1.2, 1.8)  # Make table cells taller
-    
+
     # Style header row
     for i in range(3):
         test_table[(0, i)].set_facecolor('#34495e')
         test_table[(0, i)].set_text_props(weight='bold', color='white')
-    
+
     # Highlight significant p-value
     if mw['p_value'] < 0.05:
         test_table[(2, 1)].set_facecolor('#d4edda')
         test_table[(2, 1)].set_text_props(weight='bold')
-    
-    ax4b.set_title('Statistical Test Results', fontsize=18, fontweight='bold', y=1.15)
+
+    ax4b.set_title('Statistical Test Results', fontsize=18,
+                   fontweight='bold', y=1.15)
 
     # Overall title
     fig.suptitle(
-        'HNF1B Variant Pathogenicity vs Distance to DNA\nDNA-Binding Domain Analysis (P/LP vs VUS)',
+        'HNF1B Variant Pathogenicity vs Distance to DNA\n'
+        'DNA-Binding Domain Analysis (P/LP vs VUS)',
         fontsize=20,
         fontweight='bold',
         y=1.02
@@ -649,21 +676,25 @@ def print_statistical_report(
     print("\n" + "=" * 70)
     print("STATISTICAL ANALYSIS REPORT")
     print("=" * 70)
-    
+
     # Check data characteristics first
     print("\n1. DATA CHARACTERISTICS")
     print("-" * 50)
-    
+
     if 'assumptions' in two_results:
         assumptions = two_results['assumptions']
         print("\nNormality Tests (Shapiro-Wilk):")
         for group, norm_data in assumptions.get('normality', {}).items():
-            print(f"  {group}: p = {norm_data['p_value']:.4f} - {'Normal' if norm_data['normal'] else 'NOT Normal'}")
-        
+            norm_status = 'Normal' if norm_data['normal'] else 'NOT Normal'
+            print(f"  {group}: p = {norm_data['p_value']:.4f} - {norm_status}")
+
         if 'levene' in assumptions:
             print("\nVariance Homogeneity (Levene's Test):")
-            print(f"  p = {assumptions['levene']['p_value']:.4f} - {'Equal' if assumptions['levene']['equal_variance'] else 'UNEQUAL'} variances")
-        
+            variance_status = ('Equal' if assumptions['levene']['equal_variance']
+                              else 'UNEQUAL')
+            print(f"  p = {assumptions['levene']['p_value']:.4f} - "
+                  f"{variance_status} variances")
+
         print(f"\nRecommended test: {assumptions['recommended_test']}")
         print("Actual test used: Mann-Whitney U "
               "(appropriate for non-parametric data)")
@@ -688,7 +719,7 @@ def print_statistical_report(
             print(f"  Cohen's d: {result['cohens_d']:.3f}")
         if 'cles' in result:
             print(f"  Common Language Effect Size: {result['cles']:.3f}")
-        
+
         # Interpret effect size
         if 'cohens_d' in result:
             d = abs(result['cohens_d'])
@@ -701,11 +732,11 @@ def print_statistical_report(
             else:
                 effect_interpretation = "large"
             print(f"  Effect size interpretation: {effect_interpretation}")
-        
+
         sig_text = ('SIGNIFICANT' if result['significant']
                     else 'Not significant')
         print(f"  Result: {sig_text} at α=0.05")
-    
+
     # Add correlation analysis if available
     if 'spearman_correlation' in two_results:
         corr = two_results['spearman_correlation']
@@ -718,7 +749,8 @@ def print_statistical_report(
     print("\n" + "=" * 70)
     print("HYPOTHESIS EVALUATION")
     print("=" * 70)
-    print("\nHypothesis: Variants closer to DNA are more likely to be pathogenic")
+    print("\nHypothesis: Variants closer to DNA are more likely "
+          "to be pathogenic")
 
     # Use two_summary for evaluation since it's always present
     if 'P/LP' in two_summary.index and 'VUS' in two_summary.index:
@@ -729,25 +761,31 @@ def print_statistical_report(
 
         if plp_median < vus_median:
             direction = "SUPPORTED"
-            explanation = "P/LP variants have lower median distance to DNA than VUS"
+            explanation = ("P/LP variants have lower median distance "
+                          "to DNA than VUS")
         else:
             direction = "NOT SUPPORTED"
-            explanation = "P/LP variants do not have lower median distance to DNA"
+            explanation = ("P/LP variants do not have lower median "
+                          "distance to DNA")
 
         print(f"\nResult: {direction}")
         print(f"Explanation: {explanation}")
         print("\nDistance Comparisons:")
-        print(f"  P/LP: median = {plp_median:.2f} Å, mean = {plp_mean:.2f} Å")
-        print(f"  VUS:  median = {vus_median:.2f} Å, mean = {vus_mean:.2f} Å")
+        print(f"  P/LP: median = {plp_median:.2f} Å, "
+              f"mean = {plp_mean:.2f} Å")
+        print(f"  VUS:  median = {vus_median:.2f} Å, "
+              f"mean = {vus_mean:.2f} Å")
         print(f"  Difference in medians: {vus_median - plp_median:.2f} Å")
         print(f"  Difference in means: {vus_mean - plp_mean:.2f} Å")
-    
+
     print("\n" + "=" * 70)
     print("LIMITATIONS")
     print("=" * 70)
-    print("- Analysis limited to DNA-binding domain (residues 170-280)")
+    print("- Analysis limited to DNA-binding domain "
+          "(residues 170-280)")
     print("- Cannot assess variants in other protein domains")
-    print("- No Benign/Likely Benign variants available in analyzed region")
+    print("- No Benign/Likely Benign variants available in "
+          "analyzed region")
     print("- Sample size: n=33 per group (moderate statistical power)")
 
 
