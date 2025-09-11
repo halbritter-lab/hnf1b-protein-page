@@ -150,8 +150,16 @@ export class VariantManager {
         // Distance filter handler
         const distanceFilter = document.getElementById('distance-filter');
         if (distanceFilter) {
-            distanceFilter.addEventListener('change', (event) => {
-                this.filterVariantsByDistance(event.target.value);
+            distanceFilter.addEventListener('change', () => {
+                this.applyFilters();
+            });
+        }
+        
+        // Pathogenicity filter handler
+        const pathogenicityFilter = document.getElementById('pathogenicity-filter');
+        if (pathogenicityFilter) {
+            pathogenicityFilter.addEventListener('change', () => {
+                this.applyFilters();
             });
         }
         
@@ -257,8 +265,13 @@ export class VariantManager {
         }
     }
     
-    filterVariantsByDistance(filterValue) {
+    applyFilters() {
+        const distanceFilter = document.getElementById('distance-filter');
+        const pathogenicityFilter = document.getElementById('pathogenicity-filter');
         const listItems = document.querySelectorAll('#variant-list li');
+        
+        const distanceValue = distanceFilter ? distanceFilter.value : 'all';
+        const pathogenicityValue = pathogenicityFilter ? pathogenicityFilter.value : 'all';
         
         listItems.forEach(item => {
             if (item.classList.contains('disabled')) return;
@@ -266,22 +279,45 @@ export class VariantManager {
             const variant = JSON.parse(item.dataset.variant);
             const distance = variant.distanceToDNA;
             
-            let shouldShow = true;
-            switch(filterValue) {
+            // Check distance filter
+            let passesDistanceFilter = true;
+            switch(distanceValue) {
                 case 'close':
-                    shouldShow = distance !== null && distance < 5;
+                    passesDistanceFilter = distance !== null && distance < 5;
                     break;
                 case 'medium':
-                    shouldShow = distance !== null && distance >= 5 && distance < 10;
+                    passesDistanceFilter = distance !== null && distance >= 5 && distance < 10;
                     break;
                 case 'far':
-                    shouldShow = distance !== null && distance >= 10;
+                    passesDistanceFilter = distance !== null && distance >= 10;
                     break;
                 case 'all':
                 default:
-                    shouldShow = true;
+                    passesDistanceFilter = true;
             }
             
+            // Check pathogenicity filter
+            let passesPathogenicityFilter = true;
+            switch(pathogenicityValue) {
+                case 'pathogenic':
+                    passesPathogenicityFilter = variant.type === 'Pathogenic';
+                    break;
+                case 'likely-pathogenic':
+                    passesPathogenicityFilter = variant.type === 'Likely Pathogenic';
+                    break;
+                case 'uncertain':
+                    passesPathogenicityFilter = variant.type === 'Uncertain Significance';
+                    break;
+                case 'likely-benign':
+                    passesPathogenicityFilter = variant.type === 'Likely Benign';
+                    break;
+                case 'all':
+                default:
+                    passesPathogenicityFilter = true;
+            }
+            
+            // Show only if both filters pass
+            const shouldShow = passesDistanceFilter && passesPathogenicityFilter;
             item.style.display = shouldShow ? 'flex' : 'none';
         });
     }

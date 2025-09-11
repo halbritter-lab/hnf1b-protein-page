@@ -102,11 +102,23 @@
                 <div class="control-group">
                     <button id="toggle-dna-btn">Hide DNA</button>
                     <button id="show-distances-btn">Show All Distances</button>
+                </div>
+                
+                <!-- Filter controls -->
+                <div class="filter-group">
+                    <label>Filter by:</label>
                     <select id="distance-filter">
-                        <option value="all">All Variants</option>
+                        <option value="all">All Distances</option>
                         <option value="close">< 5Å (Direct Contact)</option>
                         <option value="medium">5-10Å (Indirect)</option>
                         <option value="far">> 10Å (Distant)</option>
+                    </select>
+                    <select id="pathogenicity-filter">
+                        <option value="all">All Pathogenicities</option>
+                        <option value="pathogenic">Pathogenic</option>
+                        <option value="likely-pathogenic">Likely Pathogenic</option>
+                        <option value="uncertain">Uncertain Significance</option>
+                        <option value="likely-benign">Likely Benign</option>
                     </select>
                 </div>
             </div>

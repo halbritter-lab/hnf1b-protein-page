@@ -65,8 +65,35 @@
     margin-bottom: 10px;
 }
 
+/* Filter group styling */
+.filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #dee2e6;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: var(--text-primary, #2c3e50);
+}
+
+.filter-group select {
+    flex: 1;
+    min-width: 150px;
+}
+
 /* Distance filter */
 #distance-filter {
+    flex: 1;
+    min-width: 150px;
+}
+
+/* Pathogenicity filter */
+#pathogenicity-filter {
     flex: 1;
     min-width: 150px;
 }
